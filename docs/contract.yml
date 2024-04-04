@@ -1,0 +1,182 @@
+openapi: "3.1.0"
+info:
+  title: "Task"
+  description: "Service serving the operations and the lifecycle of tasks"
+  version: "1.0.0"
+paths:
+  /categories:
+    post:
+      description: Create task category
+      requestBody:
+        description: Category
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AddCategoryRequest'
+      responses:
+        201:
+          description: Category created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericAddResourceResponse'
+        400:
+          description: Invalid request
+        409:
+          description: Category already exists
+    get:
+      description: Fetches categories with specified filters
+      parameters:
+        - name: page
+          in: query
+          description: page number
+          required: true
+          schema:
+            type: number
+        - name: size
+          in: query
+          description: page size
+          required: false
+          default: 10
+          schema:
+            type: number
+        - name: name
+          in: query
+          description: Category name
+          required: false
+          schema:
+            type: string
+      responses:
+        200:
+          description: Successfully fetched category page
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CategoryPage'
+        400:
+          description: Invalid category request parameters
+  /categories/{id}:
+    get:
+      description: Fetches category by ID
+      parameters:
+        - name: id
+          in: path
+          description: category id
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        200:
+          description: Successfully fetched category
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GetCategoryResponse'
+        400:
+          description: Invalid request
+        404:
+          description: Category for ID not found
+    delete:
+      description: Delete categories by ID
+      parameters:
+        - name: id
+          in: path
+          description: category id
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        204:
+          description: Successfully deleted category
+        400:
+          description: Invalid request
+        404:
+          description: Not found
+        409:
+          description: Tasks are assigned to the category, tasks need to be removed then the endpoint can be retried
+    patch:
+      description: Update fields of the category
+      parameters:
+        - name: id
+          in: path
+          description: category id
+          required: true
+          schema:
+            type: integer
+            format: int64
+      requestBody:
+        description: Update Category
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateCategoryRequest'
+      responses:
+        204:
+          description: Successfully updated category
+        400:
+          description: Invalid request
+        404:
+          description: Not found
+
+components:
+  schemas:
+    AddCategoryRequest:
+      type: object
+      required:
+        - name
+      properties:
+        name:
+          type: string
+          maximum: 100
+        description:
+          type: string
+          maximum: 500
+    GenericAddResourceResponse:
+      type: object
+      required:
+        - id
+      properties:
+        id:
+          type: integer
+          format: int64
+    CategoryPage:
+      type: object
+      required:
+        - pageNumber
+        - pageSize
+        - categories
+      properties:
+        pageNumber:
+          type: integer
+        pageSize:
+          type: integer
+        categories:
+          type: array
+          items:
+            $ref: '#/components/schemas/GetCategoryResponse'
+    GetCategoryResponse:
+      type: object
+      required:
+        - id
+        - name
+      properties:
+        id:
+          type: integer
+          format: int64
+        name:
+          type: string
+          maximum: 100
+        description:
+          type: string
+          maximum: 500
+    UpdateCategoryRequest:
+      type: object
+      properties:
+        name:
+          type: string
+          maximum: 100
+        description:
+          type: string
+          maximum: 500
