@@ -2,7 +2,9 @@ openapi: "3.1.0"
 info:
   title: "Task"
   description: "Service serving the operations and the lifecycle of tasks"
-  version: "1.0.0"
+  version: "1.0"
+  servers:
+    - url: "/v1.0"
 paths:
   /categories:
     post:
@@ -12,7 +14,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/AddCategoryRequest'
+              $ref: '#/components/schemas/AddTaskCategoryRequest'
       responses:
         201:
           description: Category created successfully
@@ -40,6 +42,17 @@ paths:
           default: 10
           schema:
             type: number
+        - name: sort
+          in: query
+          description: sorting criteria
+          required: false
+          default: DESC
+          type: array
+          schema:
+            type: string
+            enum:
+              - ASC
+              - DESC
         - name: name
           in: query
           description: Category name
@@ -52,7 +65,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/CategoryPage'
+                $ref: '#/components/schemas/TaskCategoryPage'
         400:
           description: Invalid category request parameters
   /categories/{id}:
@@ -72,7 +85,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/GetCategoryResponse'
+                $ref: '#/components/schemas/GetTaskCategoryResponse'
         400:
           description: Invalid request
         404:
@@ -92,8 +105,6 @@ paths:
           description: Successfully deleted category
         400:
           description: Invalid request
-        404:
-          description: Not found
         409:
           description: Tasks are assigned to the category, tasks need to be removed then the endpoint can be retried
     patch:
@@ -111,7 +122,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/UpdateCategoryRequest'
+              $ref: '#/components/schemas/UpdateTaskCategoryRequest'
       responses:
         204:
           description: Successfully updated category
@@ -122,7 +133,7 @@ paths:
 
 components:
   schemas:
-    AddCategoryRequest:
+    AddTaskCategoryRequest:
       type: object
       required:
         - name
@@ -141,22 +152,28 @@ components:
         id:
           type: integer
           format: int64
-    CategoryPage:
+    TaskCategoryPage:
       type: object
       required:
         - pageNumber
         - pageSize
+        - totalElements
+        - totalPages
         - categories
       properties:
         pageNumber:
           type: integer
         pageSize:
           type: integer
+        totalElements:
+          type: integer
+        totalPages:
+          type: integer
         categories:
           type: array
           items:
-            $ref: '#/components/schemas/GetCategoryResponse'
-    GetCategoryResponse:
+            $ref: '#/components/schemas/GetTaskCategoryResponse'
+    GetTaskCategoryResponse:
       type: object
       required:
         - id
@@ -171,7 +188,7 @@ components:
         description:
           type: string
           maximum: 500
-    UpdateCategoryRequest:
+    UpdateTaskCategoryRequest:
       type: object
       properties:
         name:
