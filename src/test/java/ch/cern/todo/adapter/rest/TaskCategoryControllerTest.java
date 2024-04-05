@@ -59,9 +59,10 @@ class TaskCategoryControllerTest {
 
     //cannot use standalone setup as then validations are not working (due to validations post processor)
     @BeforeEach
-    public void setup() throws Exception {
+    public void setup() {
         this.mockMvc = MockMvcBuilders.webAppContextSetup(this.webApplicationContext).build();
     }
+
     @ParameterizedTest
     @MethodSource("provideRequestsAndResponsesForCreate")
     void givenAddTaskCategoryRequest_whenCreate_returnAppropriateResponses(final AddTaskCategoryRequest addTaskCategoryRequest,
@@ -108,8 +109,8 @@ class TaskCategoryControllerTest {
                                                                           final int statusCode,
                                                                           final Object response) throws Exception {
         //when
-        if(statusCode == 200) {
-            if(taskCategoryFilters.name() != null) {
+        if (statusCode == 200) {
+            if (taskCategoryFilters.name() != null) {
                 when(taskCategoryService.getTaskCategoriesByName(taskCategoryFilters)).thenReturn(taskCategoryProjection);
             } else {
                 when(taskCategoryService.getTaskCategories(taskCategoryFilters)).thenReturn(taskCategoryProjection);
@@ -129,11 +130,11 @@ class TaskCategoryControllerTest {
     @ParameterizedTest
     @MethodSource("provideRequestsAndResponsesForGetById")
     void givenId_whenGetById_returnAppropriateResponses(final Long id,
-                                                                          final TaskCategoryProjection taskCategoryProjection,
-                                                                          final int statusCode,
-                                                                          final Object response) throws Exception {
+                                                        final TaskCategoryProjection taskCategoryProjection,
+                                                        final int statusCode,
+                                                        final Object response) throws Exception {
         //when
-        if(statusCode == 200) {
+        if (statusCode == 200) {
             when(taskCategoryService.getTaskCategory(id)).thenReturn(Optional.of(taskCategoryProjection));
         }
 
@@ -143,7 +144,7 @@ class TaskCategoryControllerTest {
 
         //then
         assertEquals(statusCode, result.getResponse().getStatus());
-        if(statusCode == 200) {
+        if (statusCode == 200) {
             assertEquals(objectMapper.writeValueAsString(response), result.getResponse().getContentAsString());
         }
     }
@@ -151,27 +152,44 @@ class TaskCategoryControllerTest {
     @ParameterizedTest
     @MethodSource("provideRequestsAndResponsesForUpdate")
     void givenId_whenUpdate_returnAppropriateResponses(final Long id,
-                                                                              final UpdateTaskCategoryRequest updateTaskCategoryRequest,
-                                                                              final int statusCode,
-                                                                              final Object response) throws Exception {
+                                                       final UpdateTaskCategoryRequest updateTaskCategoryRequest,
+                                                       final int statusCode,
+                                                       final Object response) throws Exception {
         final RequestBuilder requestBuilder = MockMvcRequestBuilders.patch("/v1.0/categories/" + id)
                 .content(objectMapper.writeValueAsString(updateTaskCategoryRequest))
                 .contentType(MediaType.APPLICATION_JSON);
 
-        if(statusCode == 404) {
-            doThrow(new TaskCategoryNotFoundException()).when(taskCategoryService)
-                    .updateTaskCategory(new UpdateTaskCategoryCommand(id, updateTaskCategoryRequest.name(), updateTaskCategoryRequest.description()));
+        switch (statusCode) {
+            case 404:
+                doThrow(new TaskCategoryNotFoundException()).when(taskCategoryService)
+                        .updateTaskCategory(new UpdateTaskCategoryCommand(id, updateTaskCategoryRequest.name(), updateTaskCategoryRequest.description()));
+                break;
+            case 409:
+                doThrow(new DuplicateTaskCategoryException("Task category already exists")).when(taskCategoryService)
+                        .updateTaskCategory(new UpdateTaskCategoryCommand(id, updateTaskCategoryRequest.name(), updateTaskCategoryRequest.description()));
+                break;
+            default:
+                break;
         }
 
         final MvcResult result = mockMvc.perform(requestBuilder).andReturn();
 
         //then
         assertEquals(statusCode, result.getResponse().getStatus());
-        if(StringUtils.isNotBlank(result.getResponse().getContentAsString())) {
-            assertThat(
-                    objectMapper.readValue(result.getResponse().getContentAsString(), ListErrorResponse.class).messages(),
-                    containsInAnyOrder(((ListErrorResponse) response).messages().toArray())
-            );
+        if (StringUtils.isNotBlank(result.getResponse().getContentAsString())) {
+            switch (statusCode) {
+                case 404:
+                    assertThat(
+                            objectMapper.readValue(result.getResponse().getContentAsString(), ListErrorResponse.class).messages(),
+                            containsInAnyOrder(((ListErrorResponse) response).messages().toArray())
+                    );
+                    break;
+                case 409:
+                    assertEquals(objectMapper.writeValueAsString(response), result.getResponse().getContentAsString());
+                    break;
+                default:
+                    break;
+            }
         }
     }
 
@@ -267,12 +285,12 @@ class TaskCategoryControllerTest {
                 Arguments.of(parametersWithName, taskCategoryFiltersWithName, singleTaskCategoryProjection, 200, validSingleItemResponse),
                 Arguments.of(parametersWithNameForEmptyPage, taskCategoryFiltersForEmptyPage, emptyTaskCategoryProjection, 200, emptyPageResponse),
                 Arguments.of(pageMissing, null, null, 400, invalidResponse)
-                );
+        );
     }
 
     private static Stream<Arguments> provideRequestsAndResponsesForGetById() {
         final TaskCategoryProjection validProjection = new TaskCategoryProjection(1L, "name", "description");
-        final GetTaskCategoryResponse validResponse =  new GetTaskCategoryResponse(1L, "name", "description");
+        final GetTaskCategoryResponse validResponse = new GetTaskCategoryResponse(1L, "name", "description");
 
         return Stream.of(
                 Arguments.of(1L, validProjection, 200, validResponse),
@@ -288,11 +306,14 @@ class TaskCategoryControllerTest {
         final ListErrorResponse invalidResponse = new ListErrorResponse(
                 Set.of("Name must be smaller than 100", "Description must be smaller than 500"));
 
+        final ErrorResponse errorResponse = new ErrorResponse("Task category already exists");
+
         return Stream.of(
                 Arguments.of(1L, validRequest, 204, null),
                 Arguments.of(null, validRequest, 400, null),
                 Arguments.of(1L, invalidRequest, 400, invalidResponse),
-                Arguments.of(1L, validRequest, 404, null)
+                Arguments.of(1L, validRequest, 404, null),
+                Arguments.of(1L, validRequest, 409, errorResponse)
         );
     }
 

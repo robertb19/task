@@ -33,7 +33,7 @@ public class TaskCategoryRepository implements TaskCategoryWriteStore, TaskCateg
                     .save(TaskCategoryMapper.toTaskCategoryEntity(taskCategory));
             return TaskCategoryMapper.toTaskCategory(taskCategoryEntity);
         } catch (DataIntegrityViolationException e) {
-            log.error(e.getMessage());
+            log.debug(e.getMessage());
             if(e.getCause() instanceof ConstraintViolationException) {
                 throw new DuplicateTaskCategoryException("Task category already exists");
             } else {
@@ -51,21 +51,22 @@ public class TaskCategoryRepository implements TaskCategoryWriteStore, TaskCateg
     //I could update in one database run, however I believe this is cleaner for now and we do not have any performance issues
     @Override
     public Optional<TaskCategory> update(final TaskCategory taskCategory) {
-        final Optional<TaskCategoryEntity> taskCategoryEntity = taskCategoryRepositoryJpa.findById(taskCategory.getId());
-        if(taskCategoryEntity.isPresent()) {
-            final TaskCategoryEntity entity = taskCategoryEntity.get();
-
-            if(StringUtils.isNotEmpty(taskCategory.getName())) {
-                entity.setName(taskCategory.getName());
+        try {
+            final Optional<TaskCategoryEntity> taskCategoryEntity = taskCategoryRepositoryJpa.findById(taskCategory.getId());
+            if(taskCategoryEntity.isPresent()) {
+                final Optional<TaskCategory> updatedEntity = updateEntity(taskCategoryEntity.get(), taskCategory);
+                taskCategoryRepositoryJpa.flush();
+                return updatedEntity;
+            } else {
+                return Optional.empty();
             }
-
-            if(StringUtils.isNotBlank(taskCategory.getDescription())) {
-                entity.setDescription(taskCategory.getDescription());
+        } catch (DataIntegrityViolationException e) {
+            log.debug(e.getMessage());
+            if(e.getCause() instanceof ConstraintViolationException) {
+                throw new DuplicateTaskCategoryException("Task category already exists");
+            } else {
+                throw new TaskCategoryException("Unknown task category error");
             }
-
-            return Optional.of(TaskCategoryMapper.toTaskCategory(entity));
-        } else {
-            return Optional.empty();
         }
     }
 
@@ -102,6 +103,19 @@ public class TaskCategoryRepository implements TaskCategoryWriteStore, TaskCateg
     public Optional<TaskCategoryProjection> getTaskCategory(final Long id) {
         return taskCategoryRepositoryJpa.findById(id)
                 .map(TaskCategoryMapper::toTaskCategoryProjection);
+    }
+
+    private Optional<TaskCategory> updateEntity(final TaskCategoryEntity entity, final TaskCategory taskCategory) {
+            if(StringUtils.isNotEmpty(taskCategory.getName())) {
+                entity.setName(taskCategory.getName());
+            }
+
+            if(StringUtils.isNotBlank(taskCategory.getDescription())) {
+                entity.setDescription(taskCategory.getDescription());
+            }
+
+            taskCategoryRepositoryJpa.flush();
+            return Optional.of(TaskCategoryMapper.toTaskCategory(entity));
     }
 
     private Sort getSorting(SortDirection sortDirection) {

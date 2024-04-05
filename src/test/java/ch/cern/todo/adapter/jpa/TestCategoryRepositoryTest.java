@@ -14,7 +14,6 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.dao.DataAccessException;
-import org.springframework.dao.DataAccessResourceFailureException;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
@@ -155,6 +154,42 @@ class TestCategoryRepositoryTest {
 
         //then
         assertTrue(result.isEmpty());
+    }
+
+    @Test
+    void givenTaskCategoryWithDuplicateName_whenUpdate_throwDuplicateTaskCategoryException() {
+        //given
+        final TaskCategory taskCategory = new TaskCategory(1L, "name", "description");
+        final DataIntegrityViolationException expectedException = new DataIntegrityViolationException("Entity already exists", mock(ConstraintViolationException.class));
+        final TaskCategoryEntity persistedTaskCategoryEntity = new TaskCategoryEntity(1L, "name", "description");
+
+        //when
+        when(taskCategoryRepositoryJpa.findById(taskCategory.getId()))
+                .thenReturn(Optional.of(persistedTaskCategoryEntity));
+        doThrow(expectedException).when(taskCategoryRepositoryJpa).flush();
+        final DuplicateTaskCategoryException duplicateTaskCategoryException =
+                assertThrows(DuplicateTaskCategoryException.class, () -> taskCategoryRepository.update(taskCategory));
+
+        //then
+        assertEquals("Task category already exists", duplicateTaskCategoryException.getMessage());
+    }
+
+    @Test
+    void givenTaskCategoryWithUnknownDbError_whenUpdate_throwTaskCategoryException() {
+        //given
+        final TaskCategory taskCategory = new TaskCategory(1L, "name", "description");
+        final DataAccessException expectedException = new DataIntegrityViolationException("Entity incosistent");
+        final TaskCategoryEntity persistedTaskCategoryEntity = new TaskCategoryEntity(1L, "name", "description");
+
+        //when
+        when(taskCategoryRepositoryJpa.findById(taskCategory.getId()))
+                .thenReturn(Optional.of(persistedTaskCategoryEntity));
+        doThrow(expectedException).when(taskCategoryRepositoryJpa).flush();
+        final TaskCategoryException taskCategoryException =
+                assertThrows(TaskCategoryException.class, () -> taskCategoryRepository.update(taskCategory));
+
+        //then
+        assertEquals("Unknown task category error", taskCategoryException.getMessage());
     }
 
     @Test
