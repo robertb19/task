@@ -43,8 +43,8 @@ public class TaskCategoryEntity {
 
     /*
     I'm aware that this will hash to one bucket in HashMaps, however Hibernate shouldn't manage huge associations
-    regardless and since we do not have a good natural key (as we can change our category name), we have to go with
-    a trade-off
+    (direct queries should be used instead) regardless and since we do not have a good natural key (as we can change our category name),
+    we have to go with a trade-off
      */
     @Override
     public int hashCode() {

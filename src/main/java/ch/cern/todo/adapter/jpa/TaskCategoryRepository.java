@@ -12,7 +12,7 @@ import ch.cern.todo.core.domain.TaskCategory;
 import io.micrometer.common.util.StringUtils;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.dao.DataAccessException;
+import org.hibernate.exception.ConstraintViolationException;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.*;
 import org.springframework.stereotype.Repository;
@@ -34,10 +34,11 @@ public class TaskCategoryRepository implements TaskCategoryWriteStore, TaskCateg
             return TaskCategoryMapper.toTaskCategory(taskCategoryEntity);
         } catch (DataIntegrityViolationException e) {
             log.error(e.getMessage());
-            throw new DuplicateTaskCategoryException("Task category already exists");
-        } catch (DataAccessException e) {
-            log.error(e.getMessage());
-            throw new TaskCategoryException("Unknown task category error");
+            if(e.getCause() instanceof ConstraintViolationException) {
+                throw new DuplicateTaskCategoryException("Task category already exists");
+            } else {
+                throw new TaskCategoryException("Unknown task category error");
+            }
         }
     }
 
@@ -47,6 +48,7 @@ public class TaskCategoryRepository implements TaskCategoryWriteStore, TaskCateg
                 .map(TaskCategoryMapper::toTaskCategory);
     }
 
+    //I could update in one database run, however I believe this is cleaner for now and we do not have any performance issues
     @Override
     public Optional<TaskCategory> update(final TaskCategory taskCategory) {
         final Optional<TaskCategoryEntity> taskCategoryEntity = taskCategoryRepositoryJpa.findById(taskCategory.getId());

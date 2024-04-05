@@ -7,6 +7,7 @@ import ch.cern.todo.core.application.query.dto.CustomPage;
 import ch.cern.todo.core.application.query.dto.SortDirection;
 import ch.cern.todo.core.application.query.dto.TaskCategoryFilters;
 import ch.cern.todo.core.domain.TaskCategory;
+import org.hibernate.exception.ConstraintViolationException;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -24,8 +25,7 @@ import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 class TestCategoryRepositoryTest {
@@ -58,7 +58,7 @@ class TestCategoryRepositoryTest {
     void givenTaskCategoryWithDuplicateName_whenSave_throwDuplicateTaskCategoryException() {
         //given
         final TaskCategory taskCategory = new TaskCategory("name", "description");
-        final DataIntegrityViolationException expectedException = new DataIntegrityViolationException("Entity already exists");
+        final DataIntegrityViolationException expectedException = new DataIntegrityViolationException("Entity already exists", mock(ConstraintViolationException.class));
 
         //when
         when(taskCategoryRepositoryJpa.save(any(TaskCategoryEntity.class)))
@@ -74,7 +74,7 @@ class TestCategoryRepositoryTest {
     void givenTaskCategoryWithUnknownDbError_whenSave_throwTaskCategoryException() {
         //given
         final TaskCategory taskCategory = new TaskCategory("name", "description");
-        final DataAccessException expectedException = new DataAccessResourceFailureException("Entity incosistent");
+        final DataAccessException expectedException = new DataIntegrityViolationException("Entity incosistent");
 
         //when
         when(taskCategoryRepositoryJpa.save(any(TaskCategoryEntity.class)))
