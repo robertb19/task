@@ -2,6 +2,7 @@ plugins {
 	id 'org.springframework.boot' version '3.2.1'
 	id 'io.spring.dependency-management' version '1.1.4'
 	id 'java'
+	id "org.flywaydb.flyway" version "10.11.0"
 }
 
 group = 'ch.cern'
@@ -13,12 +14,22 @@ repositories {
 }
 
 dependencies {
+	compileOnly 'org.projectlombok:lombok'
+	annotationProcessor 'org.projectlombok:lombok'
 	implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
 	implementation 'org.springframework.boot:spring-boot-starter-web'
+	implementation 'org.springframework.boot:spring-boot-starter-validation:3.2.1'
+	implementation 'org.flywaydb:flyway-core:10.11.0'
+	implementation 'jakarta.validation:jakarta.validation-api:3.1.0-M2'
+	implementation 'org.apache.commons:commons-lang3:3.14.0'
 	runtimeOnly 'com.h2database:h2'
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
 }
 
 tasks.named('test') {
 	useJUnitPlatform()
+	testLogging {
+		exceptionFormat = 'full'
+		events 'passed', 'skipped', 'failed'
+	}
 }
