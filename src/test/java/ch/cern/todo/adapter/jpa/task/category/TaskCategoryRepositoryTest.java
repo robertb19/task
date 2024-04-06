@@ -2,6 +2,7 @@ package ch.cern.todo.adapter.jpa.task.category;
 
 import ch.cern.todo.core.application.exception.DuplicateTaskCategoryException;
 import ch.cern.todo.core.application.exception.TaskCategoryException;
+import ch.cern.todo.core.application.exception.TaskRecordsMappedException;
 import ch.cern.todo.core.application.query.TaskCategoryProjection;
 import ch.cern.todo.core.application.query.dto.CustomPage;
 import ch.cern.todo.core.application.query.dto.SortDirection;
@@ -199,6 +200,34 @@ class TaskCategoryRepositoryTest {
 
         //then
         verify(taskCategoryRepositoryJpa).deleteById(1L);
+    }
+
+    @Test
+    void givenIdToWhichTasksAreMapped_whenDeleteTaskCategory_throwTaskRecordsMappedException() {
+        //given
+        final DataIntegrityViolationException exception = new DataIntegrityViolationException("Tasks mapped to entity", mock(ConstraintViolationException.class));
+        final Long id = 1L;
+
+        //when
+        doThrow(exception).when(taskCategoryRepositoryJpa).deleteById(id);
+        final TaskRecordsMappedException result = assertThrows(TaskRecordsMappedException.class, () -> taskCategoryRepository.deleteTaskCategory(id));
+
+        //then
+        assertEquals("Unable to delete as tasks are mapped to the category", result.getMessage());
+    }
+
+    @Test
+    void givenId_whenDeleteTaskCategory_throw() {
+        //given
+        final DataAccessException exception = new DataIntegrityViolationException("Entity incosistent");
+        final Long id = 1L;
+
+        //when
+        doThrow(exception).when(taskCategoryRepositoryJpa).deleteById(id);
+        final TaskCategoryException result = assertThrows(TaskCategoryException.class, () -> taskCategoryRepository.deleteTaskCategory(id));
+
+        //then
+        assertEquals("Unknown task category error", result.getMessage());
     }
 
     @Test

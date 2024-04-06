@@ -9,9 +9,11 @@ import ch.cern.todo.adapter.rest.v1_0.task.category.request.UpdateTaskCategoryRe
 import ch.cern.todo.adapter.rest.v1_0.task.category.response.*;
 import ch.cern.todo.core.application.TaskCategoryService;
 import ch.cern.todo.core.application.command.dto.AddTaskCategoryCommand;
+import ch.cern.todo.core.application.command.dto.DeleteTaskCategoryCommand;
 import ch.cern.todo.core.application.command.dto.UpdateTaskCategoryCommand;
 import ch.cern.todo.core.application.exception.DuplicateTaskCategoryException;
 import ch.cern.todo.core.application.exception.TaskCategoryNotFoundException;
+import ch.cern.todo.core.application.exception.TaskRecordsMappedException;
 import ch.cern.todo.core.application.query.TaskCategoryProjection;
 import ch.cern.todo.core.application.query.dto.CustomPage;
 import ch.cern.todo.core.application.query.dto.SortDirection;
@@ -199,12 +201,24 @@ class TaskCategoryControllerTest {
     @ParameterizedTest
     @MethodSource("provideRequestsAndResponsesForDelete")
     void givenId_whenDelete_returnAppropriateResponses(final Long id,
-                                                       final int statusCode) throws Exception {
+                                                       final int statusCode,
+                                                       final Object response) throws Exception {
+        switch (statusCode) {
+            case 409:
+                doThrow(new TaskRecordsMappedException("Unable to delete as tasks are mapped to the category")).when(taskCategoryService).deleteTaskCategory(new DeleteTaskCategoryCommand(id));
+                break;
+            default:
+                break;
+        }
+
         final RequestBuilder requestBuilder = MockMvcRequestBuilders.delete("/v1.0/categories/" + id);
         final MvcResult result = mockMvc.perform(requestBuilder).andReturn();
 
         //then
         assertEquals(statusCode, result.getResponse().getStatus());
+        if(response != null) {
+            assertEquals(objectMapper.writeValueAsString(response), result.getResponse().getContentAsString());
+        }
     }
 
     private static Stream<Arguments> provideRequestsAndResponsesForCreate() {
@@ -321,9 +335,12 @@ class TaskCategoryControllerTest {
     }
 
     private static Stream<Arguments> provideRequestsAndResponsesForDelete() {
+        final ErrorResponse errorResponse = new ErrorResponse("Unable to delete as tasks are mapped to the category");
+
         return Stream.of(
-                Arguments.of(1L, 204),
-                Arguments.of(null, 400)
+                Arguments.of(1L, 204, null),
+                Arguments.of(null, 400, null),
+                Arguments.of(1L, 409, errorResponse)
         );
     }
 }

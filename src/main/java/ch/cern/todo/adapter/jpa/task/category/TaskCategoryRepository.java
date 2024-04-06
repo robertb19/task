@@ -2,6 +2,7 @@ package ch.cern.todo.adapter.jpa.task.category;
 
 import ch.cern.todo.core.application.exception.DuplicateTaskCategoryException;
 import ch.cern.todo.core.application.exception.TaskCategoryException;
+import ch.cern.todo.core.application.exception.TaskRecordsMappedException;
 import ch.cern.todo.core.application.port.TaskCategoryReadStore;
 import ch.cern.todo.core.application.port.TaskCategoryWriteStore;
 import ch.cern.todo.core.application.query.TaskCategoryProjection;
@@ -72,7 +73,16 @@ public class TaskCategoryRepository implements TaskCategoryWriteStore, TaskCateg
 
     @Override
     public void deleteTaskCategory(final Long id) {
-        taskCategoryRepositoryJpa.deleteById(id);
+        try {
+            taskCategoryRepositoryJpa.deleteById(id);
+        } catch (DataIntegrityViolationException e) {
+            log.debug(e.getMessage());
+            if(e.getCause() instanceof ConstraintViolationException) {
+                throw new TaskRecordsMappedException("Unable to delete as tasks are mapped to the category");
+            } else {
+                throw new TaskCategoryException("Unknown task category error");
+            }
+        }
     }
 
     @Override
