@@ -1,4 +1,4 @@
-package ch.cern.todo.core.application.query;
+package ch.cern.todo.core.application.query.dto;
 
 import java.time.ZonedDateTime;
 

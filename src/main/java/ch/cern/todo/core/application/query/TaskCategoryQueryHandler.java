@@ -3,6 +3,7 @@ package ch.cern.todo.core.application.query;
 import ch.cern.todo.core.application.port.TaskCategoryReadStore;
 import ch.cern.todo.core.application.query.dto.CustomPage;
 import ch.cern.todo.core.application.query.dto.TaskCategoryFilters;
+import ch.cern.todo.core.application.query.dto.TaskCategoryProjection;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Component;
 

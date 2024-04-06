@@ -14,7 +14,7 @@ import ch.cern.todo.core.application.command.dto.UpdateTaskCategoryCommand;
 import ch.cern.todo.core.application.exception.DuplicateTaskCategoryException;
 import ch.cern.todo.core.application.exception.TaskCategoryNotFoundException;
 import ch.cern.todo.core.application.exception.TaskRecordsMappedException;
-import ch.cern.todo.core.application.query.TaskCategoryProjection;
+import ch.cern.todo.core.application.query.dto.TaskCategoryProjection;
 import ch.cern.todo.core.application.query.dto.CustomPage;
 import ch.cern.todo.core.application.query.dto.SortDirection;
 import ch.cern.todo.core.application.query.dto.TaskCategoryFilters;

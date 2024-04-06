@@ -3,7 +3,9 @@ package ch.cern.todo.adapter.jpa.task;
 import ch.cern.todo.adapter.jpa.task.category.TaskCategoryEntity;
 import ch.cern.todo.adapter.jpa.task.category.TaskCategoryRepositoryJpa;
 import ch.cern.todo.core.application.exception.TaskCategoryNotFoundException;
+import ch.cern.todo.core.application.port.TaskReadStore;
 import ch.cern.todo.core.application.port.TaskWriteStore;
+import ch.cern.todo.core.application.query.dto.TaskProjection;
 import ch.cern.todo.core.domain.Task;
 import io.micrometer.common.util.StringUtils;
 import lombok.AllArgsConstructor;
@@ -15,7 +17,7 @@ import java.util.Optional;
 @Repository
 @AllArgsConstructor
 @Slf4j
-public class TaskRepository implements TaskWriteStore {
+public class TaskRepository implements TaskWriteStore, TaskReadStore {
 
     private final TaskRepositoryJpa taskRepositoryJpa;
 
@@ -52,6 +54,11 @@ public class TaskRepository implements TaskWriteStore {
         } else {
             return Optional.empty();
         }
+    }
+
+    public Optional<TaskProjection> getTask(final Long id) {
+        return taskRepositoryJpa.findById(id)
+                .map(TaskMapper::toTaskProjection);
     }
 
     private Optional<TaskCategoryEntity> findForUpdate(final Task task) {

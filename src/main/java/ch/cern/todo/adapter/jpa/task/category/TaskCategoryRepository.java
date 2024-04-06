@@ -5,7 +5,7 @@ import ch.cern.todo.core.application.exception.TaskCategoryException;
 import ch.cern.todo.core.application.exception.TaskRecordsMappedException;
 import ch.cern.todo.core.application.port.TaskCategoryReadStore;
 import ch.cern.todo.core.application.port.TaskCategoryWriteStore;
-import ch.cern.todo.core.application.query.TaskCategoryProjection;
+import ch.cern.todo.core.application.query.dto.TaskCategoryProjection;
 import ch.cern.todo.core.application.query.dto.CustomPage;
 import ch.cern.todo.core.application.query.dto.SortDirection;
 import ch.cern.todo.core.application.query.dto.TaskCategoryFilters;

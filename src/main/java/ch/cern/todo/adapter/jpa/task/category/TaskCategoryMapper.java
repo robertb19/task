@@ -1,9 +1,9 @@
 package ch.cern.todo.adapter.jpa.task.category;
 
-import ch.cern.todo.core.application.query.TaskCategoryProjection;
+import ch.cern.todo.core.application.query.dto.TaskCategoryProjection;
 import ch.cern.todo.core.domain.TaskCategory;
 
-final class TaskCategoryMapper {
+public final class TaskCategoryMapper {
 
     private TaskCategoryMapper(){}
 
@@ -15,7 +15,7 @@ final class TaskCategoryMapper {
         return new TaskCategory(taskCategoryEntity.getId(), taskCategoryEntity.getName(), taskCategoryEntity.getDescription());
     }
 
-    static TaskCategoryProjection toTaskCategoryProjection(final TaskCategoryEntity taskCategoryEntity) {
+    public static TaskCategoryProjection toTaskCategoryProjection(final TaskCategoryEntity taskCategoryEntity) {
         return new TaskCategoryProjection(taskCategoryEntity.getId(), taskCategoryEntity.getName(), taskCategoryEntity.getDescription());
     }
 

@@ -3,6 +3,8 @@ package ch.cern.todo.adapter.jpa.task;
 import ch.cern.todo.adapter.jpa.task.category.TaskCategoryEntity;
 import ch.cern.todo.adapter.jpa.task.category.TaskCategoryRepositoryJpa;
 import ch.cern.todo.core.application.exception.TaskCategoryNotFoundException;
+import ch.cern.todo.core.application.query.dto.TaskCategoryProjection;
+import ch.cern.todo.core.application.query.dto.TaskProjection;
 import ch.cern.todo.core.domain.Task;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -165,6 +167,30 @@ class TaskRepositoryTest {
         when(taskRepositoryJpa.findById(task.getId())).thenReturn(Optional.of(taskEntity));
         when(taskCategoryRepositoryJpa.findById(task.getTaskCategoryId())).thenThrow(new TaskCategoryNotFoundException());
         assertThrows(TaskCategoryNotFoundException.class, () -> taskRepository.update(task));
+    }
+
+    @Test
+    void givenId_whenGetTask_returnTaskProjectionOptional() {
+        //given
+        final Long id = 1L;
+        final Instant now = Instant.now();
+        final TaskCategoryProjection taskCategoryProjection = new TaskCategoryProjection(1L, "name", "description");
+        final TaskProjection taskProjection = new TaskProjection(
+                1L,
+                "name",
+                "description",
+                now.atZone(ZoneId.of("UTC")),
+                taskCategoryProjection);
+        final TaskCategoryEntity taskCategoryEntity = new TaskCategoryEntity(taskCategoryProjection.id(), taskCategoryProjection.name(), taskCategoryProjection.description());
+        final TaskEntity taskEntity = new TaskEntity(id, taskProjection.name(), taskProjection.description(), taskProjection.deadline(), taskCategoryEntity);
+
+        //when
+        when(taskRepositoryJpa.findById(id)).thenReturn(Optional.of(taskEntity));
+        final Optional<TaskProjection> result = taskRepository.getTask(id);
+
+        //then
+        assertTrue(result.isPresent());
+        assertEquals(taskProjection, result.get());
     }
 
 

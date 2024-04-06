@@ -4,7 +4,7 @@ import ch.cern.todo.core.application.command.TaskCategoryCommandHandler;
 import ch.cern.todo.core.application.command.dto.AddTaskCategoryCommand;
 import ch.cern.todo.core.application.command.dto.DeleteTaskCategoryCommand;
 import ch.cern.todo.core.application.command.dto.UpdateTaskCategoryCommand;
-import ch.cern.todo.core.application.query.TaskCategoryProjection;
+import ch.cern.todo.core.application.query.dto.TaskCategoryProjection;
 import ch.cern.todo.core.application.query.TaskCategoryQueryHandler;
 import ch.cern.todo.core.application.query.dto.CustomPage;
 import ch.cern.todo.core.application.query.dto.TaskCategoryFilters;

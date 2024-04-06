@@ -3,6 +3,7 @@ package ch.cern.todo.adapter.rest.v1_0.task;
 import ch.cern.todo.adapter.rest.v1_0.request.GenericAddResourceResponse;
 import ch.cern.todo.adapter.rest.v1_0.task.request.AddTaskRequest;
 import ch.cern.todo.adapter.rest.v1_0.task.request.UpdateTaskRequest;
+import ch.cern.todo.adapter.rest.v1_0.task.response.GetTaskResponse;
 import ch.cern.todo.core.application.TaskService;
 import ch.cern.todo.core.application.command.dto.AddTaskCommand;
 import ch.cern.todo.core.application.command.dto.DeleteTaskCommand;
@@ -59,6 +60,13 @@ public class TaskController {
         ));
 
         return ResponseEntity.noContent().build();
+    }
+
+    @GetMapping("/{id}")
+    public ResponseEntity<GetTaskResponse> getById(@PathVariable("id") final Long id) {
+        return taskService.getTask(id)
+                .map(taskProjection -> ResponseEntity.ok(GetTaskResponse.from(taskProjection)))
+                .orElseGet(() -> ResponseEntity.notFound().build());
     }
 
 }

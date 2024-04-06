@@ -5,6 +5,9 @@ import ch.cern.todo.core.application.command.TaskCommandHandler;
 import ch.cern.todo.core.application.command.dto.AddTaskCommand;
 import ch.cern.todo.core.application.command.dto.DeleteTaskCommand;
 import ch.cern.todo.core.application.command.dto.UpdateTaskCommand;
+import ch.cern.todo.core.application.query.TaskQueryHandler;
+import ch.cern.todo.core.application.query.dto.TaskCategoryProjection;
+import ch.cern.todo.core.application.query.dto.TaskProjection;
 import ch.cern.todo.core.domain.Task;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -14,8 +17,10 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.time.Instant;
 import java.time.ZoneId;
+import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -24,6 +29,9 @@ class TaskServiceTest {
 
     @Mock
     private TaskCommandHandler taskCommandHandler;
+
+    @Mock
+    private TaskQueryHandler taskQueryHandler;
 
     @InjectMocks
     private TaskService taskService;
@@ -74,6 +82,27 @@ class TaskServiceTest {
 
         //then
         verify(taskCommandHandler).handleUpdateTask(updateTaskCommand);
+    }
+
+    @Test
+    void givenId_whenGetTask_returnTaskProjectionOptional() {
+        //given
+        final Instant now = Instant.now();
+        final TaskCategoryProjection taskCategoryProjection = new TaskCategoryProjection(1L, "name", "description");
+        final TaskProjection taskProjection = new TaskProjection(
+                1L,
+                "name",
+                "description",
+                now.atZone(ZoneId.of("UTC")),
+                taskCategoryProjection);
+
+        //when
+        when(taskQueryHandler.handleGetTaskCategory(taskProjection.id())).thenReturn(Optional.of(taskProjection));
+        final Optional<TaskProjection> result = taskService.getTask(taskProjection.id());
+
+        //then
+        assertTrue(result.isPresent());
+        assertEquals(taskProjection, result.get());
     }
 
 }
