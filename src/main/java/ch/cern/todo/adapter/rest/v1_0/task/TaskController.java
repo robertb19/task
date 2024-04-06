@@ -2,9 +2,11 @@ package ch.cern.todo.adapter.rest.v1_0.task;
 
 import ch.cern.todo.adapter.rest.v1_0.request.GenericAddResourceResponse;
 import ch.cern.todo.adapter.rest.v1_0.task.request.AddTaskRequest;
+import ch.cern.todo.adapter.rest.v1_0.task.request.UpdateTaskRequest;
 import ch.cern.todo.core.application.TaskService;
 import ch.cern.todo.core.application.command.dto.AddTaskCommand;
 import ch.cern.todo.core.application.command.dto.DeleteTaskCommand;
+import ch.cern.todo.core.application.command.dto.UpdateTaskCommand;
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -41,6 +43,21 @@ public class TaskController {
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> delete(@PathVariable("id") final Long id) {
         taskService.deleteTask(new DeleteTaskCommand(id));
+        return ResponseEntity.noContent().build();
+    }
+
+    //todo change to mappers & use builders in mapper as many parameters present
+    @PatchMapping("/{id}")
+    public ResponseEntity<Void> update(@PathVariable("id") final Long id,
+                                       @RequestBody @Valid UpdateTaskRequest updateTaskRequest) {
+        taskService.updateTask(new UpdateTaskCommand(
+                id,
+                updateTaskRequest.name(),
+                updateTaskRequest.description(),
+                updateTaskRequest.deadline().atZone(clock.getZone()),
+                updateTaskRequest.categoryId()
+        ));
+
         return ResponseEntity.noContent().build();
     }
 

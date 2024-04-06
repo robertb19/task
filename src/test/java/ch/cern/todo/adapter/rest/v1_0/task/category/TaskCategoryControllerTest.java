@@ -183,7 +183,7 @@ class TaskCategoryControllerTest {
         assertEquals(statusCode, result.getResponse().getStatus());
         if (StringUtils.isNotBlank(result.getResponse().getContentAsString())) {
             switch (statusCode) {
-                case 404:
+                case 400:
                     assertThat(
                             objectMapper.readValue(result.getResponse().getContentAsString(), ListErrorResponse.class).messages(),
                             containsInAnyOrder(((ListErrorResponse) response).messages().toArray())

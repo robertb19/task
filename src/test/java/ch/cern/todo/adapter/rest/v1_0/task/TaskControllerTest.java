@@ -3,13 +3,20 @@ package ch.cern.todo.adapter.rest.v1_0.task;
 import ch.cern.todo.adapter.rest.v1_0.request.ErrorResponse;
 import ch.cern.todo.adapter.rest.v1_0.request.GenericAddResourceResponse;
 import ch.cern.todo.adapter.rest.v1_0.request.ListErrorResponse;
+import ch.cern.todo.adapter.rest.v1_0.task.category.request.UpdateTaskCategoryRequest;
 import ch.cern.todo.adapter.rest.v1_0.task.request.AddTaskRequest;
+import ch.cern.todo.adapter.rest.v1_0.task.request.UpdateTaskRequest;
 import ch.cern.todo.core.application.TaskService;
 import ch.cern.todo.core.application.command.dto.AddTaskCommand;
 import ch.cern.todo.core.application.command.dto.DeleteTaskCategoryCommand;
+import ch.cern.todo.core.application.command.dto.UpdateTaskCategoryCommand;
+import ch.cern.todo.core.application.command.dto.UpdateTaskCommand;
+import ch.cern.todo.core.application.exception.DuplicateTaskCategoryException;
 import ch.cern.todo.core.application.exception.TaskCategoryNotFoundException;
+import ch.cern.todo.core.application.exception.TaskNotFoundException;
 import ch.cern.todo.core.application.exception.TaskRecordsMappedException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import io.micrometer.common.util.StringUtils;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -35,6 +42,7 @@ import java.util.stream.Stream;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsInAnyOrder;
+import static org.hamcrest.Matchers.in;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.when;
@@ -118,6 +126,55 @@ class TaskControllerTest {
         assertEquals(statusCode, result.getResponse().getStatus());
     }
 
+    @ParameterizedTest
+    @MethodSource("provideRequestsAndResponsesForUpdate")
+    void givenId_whenUpdate_returnAppropriateResponses(final Long id,
+                                                       final UpdateTaskRequest updateTaskRequest,
+                                                       final int statusCode,
+                                                       final Object response,
+                                                       final boolean isThrowingExceptionInController) throws Exception {
+        final RequestBuilder requestBuilder = MockMvcRequestBuilders.patch("/v1.0/tasks/" + id)
+                .content(objectMapper.writeValueAsString(updateTaskRequest))
+                .contentType(MediaType.APPLICATION_JSON);
+
+        switch (statusCode) {
+            case 400:
+                if(isThrowingExceptionInController) {
+                    doThrow(new TaskCategoryNotFoundException()).when(taskService)
+                            .updateTask(toUpdateTaskCommand(id, updateTaskRequest));
+                }
+                break;
+            case 404:
+                if(isThrowingExceptionInController) {
+                    doThrow(new TaskNotFoundException()).when(taskService)
+                            .updateTask(toUpdateTaskCommand(id, updateTaskRequest));
+                }
+                break;
+            default:
+                break;
+        }
+
+        final MvcResult result = mockMvc.perform(requestBuilder).andReturn();
+
+        //then
+        assertEquals(statusCode, result.getResponse().getStatus());
+        if (StringUtils.isNotBlank(result.getResponse().getContentAsString())) {
+            switch (statusCode) {
+                case 400:
+                    if(isThrowingExceptionInController) {
+                        assertEquals(objectMapper.writeValueAsString(response), result.getResponse().getContentAsString());
+                    } else {
+                        assertThat(
+                                objectMapper.readValue(result.getResponse().getContentAsString(), ListErrorResponse.class).messages(),
+                                containsInAnyOrder(((ListErrorResponse) response).messages().toArray())
+                        );
+                    }
+                default:
+                    break;
+            }
+        }
+    }
+
     private static Stream<Arguments> provideRequestsAndResponsesForCreate() {
         final AddTaskRequest validRequest = new AddTaskRequest("name", "description", Instant.now().plusSeconds(1000L), 1L);
         final GenericAddResourceResponse validResponse = new GenericAddResourceResponse(1L);
@@ -154,6 +211,32 @@ class TaskControllerTest {
         );
     }
 
+    private static Stream<Arguments> provideRequestsAndResponsesForDelete() {
+        return Stream.of(
+                Arguments.of(1L, 204),
+                Arguments.of(null, 400)
+        );
+    }
+
+    private static Stream<Arguments> provideRequestsAndResponsesForUpdate() {
+        final Instant instant = Instant.now().plusSeconds(1000L);
+        final UpdateTaskRequest validRequest = new UpdateTaskRequest("name", "description", instant, 2L);
+
+        final UpdateTaskRequest invalidRequest = new UpdateTaskRequest(generateRandomCharacterString(101), generateRandomCharacterString(501), instant.minusSeconds(1000L), null);
+        final ListErrorResponse invalidResponse = new ListErrorResponse(
+                Set.of("Name must be smaller than 100", "Description must be smaller than 500", "Deadline must be in the future"));
+
+        final ErrorResponse taskCategoryDoesNotExistResponse = new ErrorResponse("Task category does not exist");
+
+        return Stream.of(
+                Arguments.of(1L, validRequest, 204, null, false),
+                Arguments.of(null, validRequest, 400, null, false),
+                Arguments.of(1L, invalidRequest, 400, invalidResponse, false),
+                Arguments.of(1L, validRequest, 400, taskCategoryDoesNotExistResponse, true),
+                Arguments.of(1L, validRequest, 404, null, true)
+        );
+    }
+
     private AddTaskCommand toAddTaskCommand(final AddTaskRequest addTaskRequest) {
         return new AddTaskCommand(addTaskRequest.name(),
                 addTaskRequest.description(),
@@ -161,11 +244,13 @@ class TaskControllerTest {
                 addTaskRequest.categoryId());
     }
 
-    private static Stream<Arguments> provideRequestsAndResponsesForDelete() {
-        return Stream.of(
-                Arguments.of(1L, 204),
-                Arguments.of(null, 400)
-        );
+    private UpdateTaskCommand toUpdateTaskCommand(final Long id,final UpdateTaskRequest updateTaskRequest) {
+        return new UpdateTaskCommand(
+                id,
+                updateTaskRequest.name(),
+                updateTaskRequest.description(),
+                updateTaskRequest.deadline().atZone(clock.getZone()),
+                updateTaskRequest.categoryId());
     }
 
 }
