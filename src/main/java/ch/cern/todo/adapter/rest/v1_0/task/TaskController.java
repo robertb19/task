@@ -54,7 +54,7 @@ public class TaskController {
                 id,
                 updateTaskRequest.name(),
                 updateTaskRequest.description(),
-                updateTaskRequest.deadline().atZone(clock.getZone()),
+                updateTaskRequest.deadline() != null ? updateTaskRequest.deadline().atZone(clock.getZone()) : null,
                 updateTaskRequest.categoryId()
         ));
 
