@@ -5,9 +5,12 @@ import ch.cern.todo.adapter.jpa.task.category.TaskCategoryRepositoryJpa;
 import ch.cern.todo.core.application.exception.TaskCategoryNotFoundException;
 import ch.cern.todo.core.application.port.TaskWriteStore;
 import ch.cern.todo.core.domain.Task;
+import io.micrometer.common.util.StringUtils;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Repository;
+
+import java.util.Optional;
 
 @Repository
 @AllArgsConstructor
@@ -39,5 +42,39 @@ public class TaskRepository implements TaskWriteStore {
         taskRepositoryJpa.deleteById(id);
     }
 
+    @Override
+    public Optional<Task> update(final Task task) {
+        final Optional<TaskEntity> taskEntity = taskRepositoryJpa.findById(task.getId());
+        if (taskEntity.isPresent()) {
+            final Optional<Task> updatedEntity = updateEntity(taskEntity.get(), findForUpdate(task), task);
+            taskCategoryRepositoryJpa.flush();
+            return updatedEntity;
+        } else {
+            return Optional.empty();
+        }
+    }
+
+    private Optional<TaskCategoryEntity> findForUpdate(final Task task) {
+        return task.getTaskCategoryId() != null ? Optional.of(taskCategoryRepositoryJpa.findById(task.getTaskCategoryId())
+                .orElseThrow(TaskCategoryNotFoundException::new)) :
+                Optional.empty();
+    }
+
+    private Optional<Task> updateEntity(final TaskEntity entity, final Optional<TaskCategoryEntity> taskCategoryEntity, final Task task) {
+        if(StringUtils.isNotBlank(task.getName())) {
+            entity.setName(task.getName());
+        }
+
+        if(task.getDescription() != null) {
+            entity.setDescription(task.getDescription());
+        }
+
+        if(task.getDeadline() != null) {
+            entity.setDeadline(task.getDeadline());
+        }
+
+        taskCategoryEntity.ifPresent(entity::setTaskCategory);
+        return Optional.of(TaskMapper.toTask(entity));
+    }
 
 }

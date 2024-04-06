@@ -116,15 +116,14 @@ public class TaskCategoryRepository implements TaskCategoryWriteStore, TaskCateg
     }
 
     private Optional<TaskCategory> updateEntity(final TaskCategoryEntity entity, final TaskCategory taskCategory) {
-            if(StringUtils.isNotEmpty(taskCategory.getName())) {
+            if(StringUtils.isNotBlank(taskCategory.getName())) {
                 entity.setName(taskCategory.getName());
             }
 
-            if(StringUtils.isNotBlank(taskCategory.getDescription())) {
+            if(taskCategory.getDescription() != null) {
                 entity.setDescription(taskCategory.getDescription());
             }
 
-            taskCategoryRepositoryJpa.flush();
             return Optional.of(TaskCategoryMapper.toTaskCategory(entity));
     }
 

@@ -84,5 +84,88 @@ class TaskRepositoryTest {
         verify(taskRepositoryJpa).deleteById(1L);
     }
 
+    @Test
+    void givenTask_whenUpdate_returnTaskOptional() {
+        //given
+        final Instant now = Instant.now();
+        final Task task = new Task(
+                1L,
+                "name",
+                "description",
+                now.atZone(ZoneId.of("UTC")),
+                2L);
+        final TaskCategoryEntity oldTaskCategoryEntity = new TaskCategoryEntity(2L, "oldName", "oldDescription");
+        final TaskEntity taskEntity = new TaskEntity(1L, "oldName", "oldDescription", now.minusSeconds(1L).atZone(ZoneId.of("UTC")), oldTaskCategoryEntity);
+
+        //when
+        when(taskRepositoryJpa.findById(task.getId())).thenReturn(Optional.of(taskEntity));
+        when(taskCategoryRepositoryJpa.findById(task.getTaskCategoryId())).thenReturn(Optional.of(oldTaskCategoryEntity));
+        final Optional<Task> result = taskRepository.update(task);
+
+        //then
+        assertTrue(result.isPresent());
+        assertEquals(task, result.get());
+    }
+
+    @Test
+    void givenTaskWithNullTaskCategory_whenUpdate_returnTaskOptional() {
+        //given
+        final Instant now = Instant.now();
+        final Task task = new Task(
+                1L,
+                "name",
+                "description",
+                now.atZone(ZoneId.of("UTC")),
+                null);
+        final TaskCategoryEntity oldTaskCategoryEntity = new TaskCategoryEntity(2L, "oldName", "oldDescription");
+        final TaskEntity taskEntity = new TaskEntity(1L, "oldName", "oldDescription", now.minusSeconds(1L).atZone(ZoneId.of("UTC")), oldTaskCategoryEntity);
+
+        //when
+        when(taskRepositoryJpa.findById(task.getId())).thenReturn(Optional.of(taskEntity));
+        final Optional<Task> result = taskRepository.update(task);
+
+        //then
+        assertTrue(result.isPresent());
+        assertEquals(task, result.get());
+    }
+
+    @Test
+    void givenInexistentTask_whenUpdate_returnEmptyOptional() {
+        //given
+        final Instant now = Instant.now();
+        final Task task = new Task(
+                1L,
+                "name",
+                "description",
+                now.atZone(ZoneId.of("UTC")),
+                2L);
+
+        //when
+        when(taskRepositoryJpa.findById(task.getId())).thenReturn(Optional.empty());
+        final Optional<Task> result = taskRepository.update(task);
+
+        //then
+        assertTrue(result.isEmpty());
+    }
+
+    @Test
+    void givenTaskWithInexistentCategoryName_whenUpdate_throwTaskCategoryNotFoundException() {
+        //given
+        final Instant now = Instant.now();
+        final Task task = new Task(
+                1L,
+                "name",
+                "description",
+                now.atZone(ZoneId.of("UTC")),
+                2L);
+        final TaskCategoryEntity oldTaskCategoryEntity = new TaskCategoryEntity(2L, "oldName", "oldDescription");
+        final TaskEntity taskEntity = new TaskEntity(1L, "oldName", "oldDescription", now.minusSeconds(1L).atZone(ZoneId.of("UTC")), oldTaskCategoryEntity);
+
+        //when and then
+        when(taskRepositoryJpa.findById(task.getId())).thenReturn(Optional.of(taskEntity));
+        when(taskCategoryRepositoryJpa.findById(task.getTaskCategoryId())).thenThrow(new TaskCategoryNotFoundException());
+        assertThrows(TaskCategoryNotFoundException.class, () -> taskRepository.update(task));
+    }
+
 
 }

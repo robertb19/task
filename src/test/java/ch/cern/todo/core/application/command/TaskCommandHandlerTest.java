@@ -2,6 +2,8 @@ package ch.cern.todo.core.application.command;
 
 import ch.cern.todo.core.application.command.dto.AddTaskCommand;
 import ch.cern.todo.core.application.command.dto.DeleteTaskCommand;
+import ch.cern.todo.core.application.command.dto.UpdateTaskCommand;
+import ch.cern.todo.core.application.exception.TaskNotFoundException;
 import ch.cern.todo.core.application.port.TaskWriteStore;
 import ch.cern.todo.core.domain.Task;
 import org.junit.jupiter.api.Test;
@@ -12,8 +14,10 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.time.Instant;
 import java.time.ZoneId;
+import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -56,6 +60,55 @@ class TaskCommandHandlerTest {
 
         //then
         verify(taskWriteStore).delete(deleteTaskCommand.id());
+    }
+
+    @Test
+    void givenUpdateTaskCommand_whenHandleUpdateTask_executeSuccessfully() {
+        //given
+        final Instant now = Instant.now();
+        final Task task = new Task(
+                1L,
+                "name",
+                "description",
+                now.atZone(ZoneId.of("UTC")),
+                1L);
+        final UpdateTaskCommand updateTaskCommand = new UpdateTaskCommand(
+                task.getId(),
+                task.getName(),
+                task.getDescription(),
+                task.getDeadline(),
+                task.getTaskCategoryId()
+        );
+
+        //when
+        when(taskWriteStore.update(task)).thenReturn(Optional.of(task));
+        taskCommandHandler.handleUpdateTask(updateTaskCommand);
+
+        //then
+        verify(taskWriteStore).update(task);
+    }
+
+    @Test
+    void givenUpdateTaskCommandWithInexistentId_whenHandleUpdateTask_throwTaskNotFoundException() {
+        //given
+        final Instant now = Instant.now();
+        final Task task = new Task(
+                1L,
+                "name",
+                "description",
+                now.atZone(ZoneId.of("UTC")),
+                1L);
+        final UpdateTaskCommand updateTaskCommand = new UpdateTaskCommand(
+                task.getId(),
+                task.getName(),
+                task.getDescription(),
+                task.getDeadline(),
+                task.getTaskCategoryId()
+        );
+
+        //when and then
+        when(taskWriteStore.update(task)).thenReturn(Optional.empty());
+        assertThrows(TaskNotFoundException.class, () -> taskCommandHandler.handleUpdateTask(updateTaskCommand));
     }
 
 }

@@ -4,6 +4,8 @@ import ch.cern.todo.core.application.TaskService;
 import ch.cern.todo.core.application.command.TaskCommandHandler;
 import ch.cern.todo.core.application.command.dto.AddTaskCommand;
 import ch.cern.todo.core.application.command.dto.DeleteTaskCommand;
+import ch.cern.todo.core.application.command.dto.UpdateTaskCommand;
+import ch.cern.todo.core.domain.Task;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -54,6 +56,24 @@ class TaskServiceTest {
 
         //then
         verify(taskCommandHandler).handleDeleteTask(deleteTaskCommand);
+    }
+
+    @Test
+    void givenUpdateTaskCommand_whenUpdateTask_executeSuccessfully() {
+        //given
+        final Instant now = Instant.now();
+        final UpdateTaskCommand updateTaskCommand = new UpdateTaskCommand(
+                1L,
+                "name",
+                "description",
+                now.atZone(ZoneId.of("UTC")),
+                1L);
+
+        //when
+        taskService.updateTask(updateTaskCommand);
+
+        //then
+        verify(taskCommandHandler).handleUpdateTask(updateTaskCommand);
     }
 
 }

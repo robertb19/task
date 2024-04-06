@@ -3,6 +3,7 @@ package ch.cern.todo.core.application;
 import ch.cern.todo.core.application.command.TaskCommandHandler;
 import ch.cern.todo.core.application.command.dto.AddTaskCommand;
 import ch.cern.todo.core.application.command.dto.DeleteTaskCommand;
+import ch.cern.todo.core.application.command.dto.UpdateTaskCommand;
 import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -20,6 +21,11 @@ public class TaskService {
 
     public void deleteTask(final DeleteTaskCommand deleteTaskCommand) {
         taskCommandHandler.handleDeleteTask(deleteTaskCommand);
+    }
+
+    @Transactional
+    public void updateTask(final UpdateTaskCommand updateTaskCommand) {
+        taskCommandHandler.handleUpdateTask(updateTaskCommand);
     }
 
 }
