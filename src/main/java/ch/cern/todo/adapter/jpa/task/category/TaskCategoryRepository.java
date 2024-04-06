@@ -72,7 +72,7 @@ public class TaskCategoryRepository implements TaskCategoryWriteStore, TaskCateg
     }
 
     @Override
-    public void deleteTaskCategory(final Long id) {
+    public void delete(final Long id) {
         try {
             taskCategoryRepositoryJpa.deleteById(id);
         } catch (DataIntegrityViolationException e) {

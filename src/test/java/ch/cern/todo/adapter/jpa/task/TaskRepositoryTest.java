@@ -18,7 +18,7 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
-class TestRepositoryTest {
+class TaskRepositoryTest {
 
     @Mock
     private TaskRepositoryJpa taskRepositoryJpa;
@@ -76,5 +76,13 @@ class TestRepositoryTest {
                 .thenThrow(new TaskCategoryNotFoundException());
         assertThrows(TaskCategoryNotFoundException.class, () -> taskRepository.save(task));
     }
+
+    @Test
+    void givenId_whenDelete_thenCheckRepoInvokedOnce() {
+        //when and then
+        taskRepository.delete(1L);
+        verify(taskRepositoryJpa).deleteById(1L);
+    }
+
 
 }

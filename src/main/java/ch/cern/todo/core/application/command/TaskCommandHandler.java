@@ -1,6 +1,7 @@
 package ch.cern.todo.core.application.command;
 
 import ch.cern.todo.core.application.command.dto.AddTaskCommand;
+import ch.cern.todo.core.application.command.dto.DeleteTaskCommand;
 import ch.cern.todo.core.application.command.mapper.TaskCommandMapper;
 import ch.cern.todo.core.application.port.TaskWriteStore;
 import lombok.AllArgsConstructor;
@@ -15,6 +16,10 @@ public class TaskCommandHandler {
     public Long handleAddTask(final AddTaskCommand addTaskCommand) {
         return taskWriteStore.save(TaskCommandMapper.toTaskCategory(addTaskCommand))
                 .getId();
+    }
+
+    public void handleDeleteTask(final DeleteTaskCommand deleteTaskCommand) {
+        taskWriteStore.delete(deleteTaskCommand.id());
     }
 
 }

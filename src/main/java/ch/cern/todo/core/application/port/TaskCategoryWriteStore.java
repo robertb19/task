@@ -12,5 +12,5 @@ public interface TaskCategoryWriteStore {
 
     Optional<TaskCategory> update(TaskCategory taskCategory);
 
-    void deleteTaskCategory(final Long id);
+    void delete(final Long id);
 }

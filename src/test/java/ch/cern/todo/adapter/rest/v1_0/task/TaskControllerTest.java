@@ -6,7 +6,9 @@ import ch.cern.todo.adapter.rest.v1_0.request.ListErrorResponse;
 import ch.cern.todo.adapter.rest.v1_0.task.request.AddTaskRequest;
 import ch.cern.todo.core.application.TaskService;
 import ch.cern.todo.core.application.command.dto.AddTaskCommand;
+import ch.cern.todo.core.application.command.dto.DeleteTaskCategoryCommand;
 import ch.cern.todo.core.application.exception.TaskCategoryNotFoundException;
+import ch.cern.todo.core.application.exception.TaskRecordsMappedException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -34,6 +36,7 @@ import java.util.stream.Stream;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.when;
 import static util.TestUtils.generateRandomCharacterString;
 
@@ -104,6 +107,17 @@ class TaskControllerTest {
         }
     }
 
+    @ParameterizedTest
+    @MethodSource("provideRequestsAndResponsesForDelete")
+    void givenId_whenDelete_returnAppropriateResponses(final Long id,
+                                                       final int statusCode) throws Exception {
+        final RequestBuilder requestBuilder = MockMvcRequestBuilders.delete("/v1.0/tasks/" + id);
+        final MvcResult result = mockMvc.perform(requestBuilder).andReturn();
+
+        //then
+        assertEquals(statusCode, result.getResponse().getStatus());
+    }
+
     private static Stream<Arguments> provideRequestsAndResponsesForCreate() {
         final AddTaskRequest validRequest = new AddTaskRequest("name", "description", Instant.now().plusSeconds(1000L), 1L);
         final GenericAddResourceResponse validResponse = new GenericAddResourceResponse(1L);
@@ -147,5 +161,11 @@ class TaskControllerTest {
                 addTaskRequest.categoryId());
     }
 
+    private static Stream<Arguments> provideRequestsAndResponsesForDelete() {
+        return Stream.of(
+                Arguments.of(1L, 204),
+                Arguments.of(null, 400)
+        );
+    }
 
 }

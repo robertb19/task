@@ -3,6 +3,7 @@ package ch.cern.todo.core;
 import ch.cern.todo.core.application.TaskService;
 import ch.cern.todo.core.application.command.TaskCommandHandler;
 import ch.cern.todo.core.application.command.dto.AddTaskCommand;
+import ch.cern.todo.core.application.command.dto.DeleteTaskCommand;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -13,6 +14,7 @@ import java.time.Instant;
 import java.time.ZoneId;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -40,6 +42,18 @@ class TaskServiceTest {
 
         //then
         assertEquals(1L, result);
+    }
+
+    @Test
+    void givenDeleteTaskCommand_whenDeleteTask_executeSuccessfully() {
+        //given
+        final DeleteTaskCommand deleteTaskCommand = new DeleteTaskCommand(1L);
+
+        //when
+        taskService.deleteTask(deleteTaskCommand);
+
+        //then
+        verify(taskCommandHandler).handleDeleteTask(deleteTaskCommand);
     }
 
 }

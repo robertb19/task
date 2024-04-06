@@ -34,4 +34,10 @@ public class TaskRepository implements TaskWriteStore {
         return TaskMapper.toTask(persistedTask);
     }
 
+    @Override
+    public void delete(Long id) {
+        taskRepositoryJpa.deleteById(id);
+    }
+
+
 }

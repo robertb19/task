@@ -4,15 +4,13 @@ import ch.cern.todo.adapter.rest.v1_0.request.GenericAddResourceResponse;
 import ch.cern.todo.adapter.rest.v1_0.task.request.AddTaskRequest;
 import ch.cern.todo.core.application.TaskService;
 import ch.cern.todo.core.application.command.dto.AddTaskCommand;
+import ch.cern.todo.core.application.command.dto.DeleteTaskCommand;
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.time.Clock;
 
@@ -38,6 +36,12 @@ public class TaskController {
                         addTaskRequest.categoryId()));
 
         return new ResponseEntity<>(new GenericAddResourceResponse(createdId), HttpStatus.CREATED);
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> delete(@PathVariable("id") final Long id) {
+        taskService.deleteTask(new DeleteTaskCommand(id));
+        return ResponseEntity.noContent().build();
     }
 
 }

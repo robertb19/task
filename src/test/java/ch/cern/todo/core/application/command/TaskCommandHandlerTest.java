@@ -1,6 +1,7 @@
 package ch.cern.todo.core.application.command;
 
 import ch.cern.todo.core.application.command.dto.AddTaskCommand;
+import ch.cern.todo.core.application.command.dto.DeleteTaskCommand;
 import ch.cern.todo.core.application.port.TaskWriteStore;
 import ch.cern.todo.core.domain.Task;
 import org.junit.jupiter.api.Test;
@@ -13,6 +14,7 @@ import java.time.Instant;
 import java.time.ZoneId;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -42,6 +44,18 @@ class TaskCommandHandlerTest {
 
         //then
         assertEquals(1L, result);
+    }
+
+    @Test
+    void givenDeleteTaskCommand_whenHandleDeleteTask_executeSuccessfully() {
+        //given
+        final DeleteTaskCommand deleteTaskCommand = new DeleteTaskCommand(1L);
+
+        //when
+        taskCommandHandler.handleDeleteTask(deleteTaskCommand);
+
+        //then
+        verify(taskWriteStore).delete(deleteTaskCommand.id());
     }
 
 }

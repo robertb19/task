@@ -78,7 +78,7 @@ class TaskCategoryCommandHandlerTest {
         taskCategoryCommandHandler.handleDeleteTaskCategory(deleteTaskCategoryCommand);
 
         //then
-        verify(taskCategoryWriteStore).deleteTaskCategory(deleteTaskCategoryCommand.id());
+        verify(taskCategoryWriteStore).delete(deleteTaskCategoryCommand.id());
     }
 
 }

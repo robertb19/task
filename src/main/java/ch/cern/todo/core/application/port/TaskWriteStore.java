@@ -6,4 +6,6 @@ public interface TaskWriteStore {
 
     Task save(Task task);
 
+    void delete(final Long id);
+
 }

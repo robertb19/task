@@ -194,37 +194,37 @@ class TaskCategoryRepositoryTest {
     }
 
     @Test
-    void givenId_whenDeleteTaskCategory_thenCheckRepoInvokedOnce() {
+    void givenId_whenDelete_thenCheckRepoInvokedOnce() {
         //when
-        taskCategoryRepository.deleteTaskCategory(1L);
+        taskCategoryRepository.delete(1L);
 
         //then
         verify(taskCategoryRepositoryJpa).deleteById(1L);
     }
 
     @Test
-    void givenIdToWhichTasksAreMapped_whenDeleteTaskCategory_throwTaskRecordsMappedException() {
+    void givenIdToWhichTasksAreMapped_whenDelete_throwTaskRecordsMappedException() {
         //given
         final DataIntegrityViolationException exception = new DataIntegrityViolationException("Tasks mapped to entity", mock(ConstraintViolationException.class));
         final Long id = 1L;
 
         //when
         doThrow(exception).when(taskCategoryRepositoryJpa).deleteById(id);
-        final TaskRecordsMappedException result = assertThrows(TaskRecordsMappedException.class, () -> taskCategoryRepository.deleteTaskCategory(id));
+        final TaskRecordsMappedException result = assertThrows(TaskRecordsMappedException.class, () -> taskCategoryRepository.delete(id));
 
         //then
         assertEquals("Unable to delete as tasks are mapped to the category", result.getMessage());
     }
 
     @Test
-    void givenId_whenDeleteTaskCategory_throw() {
+    void givenId_whenDelete_throwTaskCategoryException() {
         //given
         final DataAccessException exception = new DataIntegrityViolationException("Entity incosistent");
         final Long id = 1L;
 
         //when
         doThrow(exception).when(taskCategoryRepositoryJpa).deleteById(id);
-        final TaskCategoryException result = assertThrows(TaskCategoryException.class, () -> taskCategoryRepository.deleteTaskCategory(id));
+        final TaskCategoryException result = assertThrows(TaskCategoryException.class, () -> taskCategoryRepository.delete(id));
 
         //then
         assertEquals("Unknown task category error", result.getMessage());
