@@ -1,4 +1,4 @@
-package ch.cern.todo.adapter.jpa;
+package ch.cern.todo.adapter.jpa.task.category;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;

@@ -1,4 +1,4 @@
-package ch.cern.todo.adapter.jpa;
+package ch.cern.todo.adapter.jpa.task.category;
 
 import ch.cern.todo.core.application.exception.DuplicateTaskCategoryException;
 import ch.cern.todo.core.application.exception.TaskCategoryException;
@@ -27,7 +27,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
-class TestCategoryRepositoryTest {
+class TaskCategoryRepositoryTest {
 
     @Mock
     private TaskCategoryRepositoryJpa taskCategoryRepositoryJpa;

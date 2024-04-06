@@ -1,4 +1,4 @@
-package ch.cern.todo.adapter.jpa;
+package ch.cern.todo.adapter.jpa.task.category;
 
 import ch.cern.todo.core.application.exception.DuplicateTaskCategoryException;
 import ch.cern.todo.core.application.exception.TaskCategoryException;

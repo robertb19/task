@@ -1,9 +1,6 @@
 package ch.cern.todo.adapter.rest.v1_0.exception;
 
-import ch.cern.todo.adapter.rest.v1_0.response.ErrorResponse;
-import ch.cern.todo.adapter.rest.v1_0.response.ListErrorResponse;
-import ch.cern.todo.core.application.exception.DuplicateTaskCategoryException;
-import ch.cern.todo.core.application.exception.NotFoundException;
+import ch.cern.todo.adapter.rest.v1_0.request.ListErrorResponse;
 import jakarta.validation.ConstraintViolation;
 import jakarta.validation.ConstraintViolationException;
 import org.springframework.context.support.DefaultMessageSourceResolvable;
@@ -17,14 +14,7 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import java.util.stream.Collectors;
 
 @ControllerAdvice
-public class ExceptionHandler {
-
-    @ResponseBody
-    @org.springframework.web.bind.annotation.ExceptionHandler(value = {DuplicateTaskCategoryException.class})
-    @ResponseStatus(HttpStatus.CONFLICT)
-    public ResponseEntity<ErrorResponse> handleException(RuntimeException exception) {
-        return new ResponseEntity<>(new ErrorResponse(exception.getMessage()), HttpStatus.CONFLICT);
-    }
+public class GlobalExceptionHandler {
 
     @ResponseBody
     @org.springframework.web.bind.annotation.ExceptionHandler(value = {MethodArgumentNotValidException.class})
@@ -46,13 +36,6 @@ public class ExceptionHandler {
                 .body(new ListErrorResponse(exception.getConstraintViolations().stream()
                         .map(ConstraintViolation::getMessage)
                         .collect(Collectors.toSet())));
-    }
-
-    @ResponseBody
-    @org.springframework.web.bind.annotation.ExceptionHandler(value = {NotFoundException.class})
-    @ResponseStatus(HttpStatus.NOT_FOUND)
-    public ResponseEntity<Void> handleException() {
-        return ResponseEntity.notFound().build();
     }
 
 

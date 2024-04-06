@@ -1,9 +1,12 @@
-package ch.cern.todo.adapter.rest;
+package ch.cern.todo.adapter.rest.v1_0.task.category;
 
-import ch.cern.todo.adapter.rest.v1_0.TaskCategoryController;
-import ch.cern.todo.adapter.rest.v1_0.request.AddTaskCategoryRequest;
-import ch.cern.todo.adapter.rest.v1_0.request.UpdateTaskCategoryRequest;
-import ch.cern.todo.adapter.rest.v1_0.response.*;
+import ch.cern.todo.adapter.rest.v1_0.request.CommonPage;
+import ch.cern.todo.adapter.rest.v1_0.request.ErrorResponse;
+import ch.cern.todo.adapter.rest.v1_0.request.GenericAddResourceResponse;
+import ch.cern.todo.adapter.rest.v1_0.request.ListErrorResponse;
+import ch.cern.todo.adapter.rest.v1_0.task.category.request.AddTaskCategoryRequest;
+import ch.cern.todo.adapter.rest.v1_0.task.category.request.UpdateTaskCategoryRequest;
+import ch.cern.todo.adapter.rest.v1_0.task.category.response.*;
 import ch.cern.todo.core.application.TaskCategoryService;
 import ch.cern.todo.core.application.command.dto.AddTaskCategoryCommand;
 import ch.cern.todo.core.application.command.dto.UpdateTaskCategoryCommand;
@@ -15,7 +18,6 @@ import ch.cern.todo.core.application.query.dto.SortDirection;
 import ch.cern.todo.core.application.query.dto.TaskCategoryFilters;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.micrometer.common.util.StringUtils;
-import org.apache.commons.lang3.RandomStringUtils;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -42,6 +44,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.*;
+import static util.TestUtils.generateRandomCharacterString;
 
 @ExtendWith(SpringExtension.class)
 @WebMvcTest(TaskCategoryController.class)
@@ -322,9 +325,5 @@ class TaskCategoryControllerTest {
                 Arguments.of(1L, 204),
                 Arguments.of(null, 400)
         );
-    }
-
-    private static String generateRandomCharacterString(final int length) {
-        return RandomStringUtils.randomAlphabetic(length);
     }
 }

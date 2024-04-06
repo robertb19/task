@@ -1,4 +1,4 @@
-package ch.cern.todo.adapter.rest.v1_0.response;
+package ch.cern.todo.adapter.rest.v1_0.task.category.response;
 
 import ch.cern.todo.core.application.query.TaskCategoryProjection;
 

@@ -1,4 +1,4 @@
-package ch.cern.todo.adapter.rest.v1_0.request;
+package ch.cern.todo.adapter.rest.v1_0.task.category.request;
 
 import jakarta.validation.constraints.Size;
 

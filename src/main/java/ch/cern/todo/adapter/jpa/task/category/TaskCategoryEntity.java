@@ -1,4 +1,4 @@
-package ch.cern.todo.adapter.jpa;
+package ch.cern.todo.adapter.jpa.task.category;
 
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;

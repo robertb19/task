@@ -1,10 +1,10 @@
-package ch.cern.todo.adapter.rest.v1_0;
+package ch.cern.todo.adapter.rest.v1_0.task.category;
 
-import ch.cern.todo.adapter.rest.v1_0.request.AddTaskCategoryRequest;
-import ch.cern.todo.adapter.rest.v1_0.request.UpdateTaskCategoryRequest;
-import ch.cern.todo.adapter.rest.v1_0.response.CommonPage;
-import ch.cern.todo.adapter.rest.v1_0.response.GenericAddResourceResponse;
-import ch.cern.todo.adapter.rest.v1_0.response.GetTaskCategoryResponse;
+import ch.cern.todo.adapter.rest.v1_0.task.category.request.AddTaskCategoryRequest;
+import ch.cern.todo.adapter.rest.v1_0.task.category.request.UpdateTaskCategoryRequest;
+import ch.cern.todo.adapter.rest.v1_0.request.CommonPage;
+import ch.cern.todo.adapter.rest.v1_0.request.GenericAddResourceResponse;
+import ch.cern.todo.adapter.rest.v1_0.task.category.response.GetTaskCategoryResponse;
 import ch.cern.todo.core.application.TaskCategoryService;
 import ch.cern.todo.core.application.command.dto.AddTaskCategoryCommand;
 import ch.cern.todo.core.application.command.dto.DeleteTaskCategoryCommand;

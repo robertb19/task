@@ -172,8 +172,7 @@ paths:
                 $ref: '#/components/schemas/GenericAddResourceResponse'
         400:
           description: Invalid request
-        409:
-          description: Task already exists
+
     get:
       tags:
         - tasks
