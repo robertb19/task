@@ -24,7 +24,8 @@ class TaskCategoryEntityTest {
         final TaskCategoryEntity otherEntity = new TaskCategoryEntity(2L, "name", "description");
 
         //when and then
-        assertFalse(taskCategoryEntity.equals(otherEntity) && otherEntity.equals(taskCategoryEntity));
+        assertNotEquals(taskCategoryEntity, otherEntity);
+        assertNotEquals(otherEntity, taskCategoryEntity);
     }
 
     @Test
