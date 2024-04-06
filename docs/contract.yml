@@ -6,7 +6,7 @@ info:
   version: "1.0"
 
 servers:
-  - url: /todos
+  - url: http://localhost:8080/todos
 
 basePath: "/todos"
 
