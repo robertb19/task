@@ -1,9 +1,10 @@
 package ch.cern.todo.core.application.query;
 
-import ch.cern.todo.adapter.jpa.TaskCategoryRepository;
+import ch.cern.todo.core.application.port.TaskCategoryReadStore;
 import ch.cern.todo.core.application.query.dto.CustomPage;
 import ch.cern.todo.core.application.query.dto.SortDirection;
 import ch.cern.todo.core.application.query.dto.TaskCategoryFilters;
+import ch.cern.todo.core.application.query.dto.TaskCategoryProjection;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -21,7 +22,7 @@ import static org.mockito.Mockito.when;
 class TaskCategoryQueryHandlerTest {
 
     @Mock
-    private TaskCategoryRepository taskCategoryReadStore;
+    private TaskCategoryReadStore taskCategoryReadStore;
 
     @InjectMocks
     private TaskCategoryQueryHandler taskCategoryQueryHandler;

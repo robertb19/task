@@ -27,7 +27,7 @@ public class TaskCategoryCommandHandler {
     }
 
     public void handleDeleteTaskCategory(final DeleteTaskCategoryCommand deleteTaskCategoryCommand) {
-        taskCategoryWriteStore.deleteTaskCategory(deleteTaskCategoryCommand.id());
+        taskCategoryWriteStore.delete(deleteTaskCategoryCommand.id());
     }
 
 }

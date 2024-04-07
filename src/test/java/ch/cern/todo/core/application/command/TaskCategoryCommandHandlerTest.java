@@ -1,10 +1,10 @@
 package ch.cern.todo.core.application.command;
 
-import ch.cern.todo.adapter.jpa.TaskCategoryRepository;
 import ch.cern.todo.core.application.command.dto.AddTaskCategoryCommand;
 import ch.cern.todo.core.application.command.dto.DeleteTaskCategoryCommand;
 import ch.cern.todo.core.application.command.dto.UpdateTaskCategoryCommand;
 import ch.cern.todo.core.application.exception.TaskCategoryNotFoundException;
+import ch.cern.todo.core.application.port.TaskCategoryWriteStore;
 import ch.cern.todo.core.domain.TaskCategory;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -23,7 +23,7 @@ import static org.mockito.Mockito.when;
 class TaskCategoryCommandHandlerTest {
 
     @Mock
-    private TaskCategoryRepository taskCategoryWriteStore;
+    private TaskCategoryWriteStore taskCategoryWriteStore;
 
     @InjectMocks
     private TaskCategoryCommandHandler taskCategoryCommandHandler;
@@ -78,7 +78,7 @@ class TaskCategoryCommandHandlerTest {
         taskCategoryCommandHandler.handleDeleteTaskCategory(deleteTaskCategoryCommand);
 
         //then
-        verify(taskCategoryWriteStore).deleteTaskCategory(deleteTaskCategoryCommand.id());
+        verify(taskCategoryWriteStore).delete(deleteTaskCategoryCommand.id());
     }
 
 }

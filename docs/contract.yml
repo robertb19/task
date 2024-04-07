@@ -1,13 +1,26 @@
 openapi: "3.1.0"
+
 info:
   title: "Task"
-  description: "Service serving the operations and the lifecycle of tasks"
+  description: "Service serving the operations and the lifecycle of tasks, base url at /todos"
   version: "1.0"
-  servers:
-    - url: "/v1.0"
+
+servers:
+  - url: http://localhost:8080/todos
+
+basePath: "/todos"
+
+tags:
+  - name: categories
+    description: Task categories
+  - name: tasks
+    description: Tasks
+
 paths:
-  /categories:
+  /v1.0/categories:
     post:
+      tags:
+        - categories
       description: Create task category
       requestBody:
         description: Category
@@ -27,6 +40,8 @@ paths:
         409:
           description: Category already exists
     get:
+      tags:
+        - categories
       description: Fetches categories with specified filters
       parameters:
         - name: page
@@ -39,20 +54,19 @@ paths:
           in: query
           description: page size
           required: false
-          default: 10
           schema:
             type: number
+            default: 10
         - name: sort
           in: query
           description: sorting criteria
           required: false
-          default: DESC
-          type: array
           schema:
             type: string
             enum:
               - ASC
               - DESC
+            default: DESC
         - name: name
           in: query
           description: Category name
@@ -68,8 +82,10 @@ paths:
                 $ref: '#/components/schemas/TaskCategoryPage'
         400:
           description: Invalid category request parameters
-  /categories/{id}:
+  /v1.0/categories/{id}:
     get:
+      tags:
+        - categories
       description: Fetches category by ID
       parameters:
         - name: id
@@ -91,6 +107,8 @@ paths:
         404:
           description: Category for ID not found
     delete:
+      tags:
+        - categories
       description: Delete categories by ID
       parameters:
         - name: id
@@ -108,6 +126,8 @@ paths:
         409:
           description: Tasks are assigned to the category, tasks need to be removed then the endpoint can be retried
     patch:
+      tags:
+        - categories
       description: Update fields of the category
       parameters:
         - name: id
@@ -130,6 +150,163 @@ paths:
           description: Invalid request
         404:
           description: Not found
+        409:
+          description: Task category with given name already exists
+  /v1.0/tasks:
+    post:
+      tags:
+        - tasks
+      description: Create task
+      requestBody:
+        description: Task
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AddTaskRequest'
+      responses:
+        201:
+          description: Task created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericAddResourceResponse'
+        400:
+          description: Invalid request
+
+    get:
+      tags:
+        - tasks
+      description: Fetches tasks with specified filters
+      parameters:
+        - name: page
+          in: query
+          description: page number
+          required: true
+          schema:
+            type: number
+        - name: size
+          in: query
+          description: page size
+          required: false
+          schema:
+            type: number
+            default: 10
+        - name: sort
+          in: query
+          description: sorting criteria
+          required: false
+          schema:
+            type: string
+            enum:
+              - ASC
+              - DESC
+            default: DESC
+        - name: name
+          in: query
+          description: Task name
+          required: false
+          schema:
+            type: string
+        - name: deadlineDate
+          in: query
+          description: Deadline
+          required: false
+          schema:
+            type: int
+            format: int64
+        - name: deadlineMode
+          in: query
+          description: Deadline mode (co-operates with deadlineDate), before or after deadline
+          required: false
+          schema:
+            type: string
+            enum:
+              - BEFORE
+              - AFTER
+            default: AFTER
+        - name: category
+          in: query
+          description: Category id
+          required: false
+          schema:
+            type: int
+            format: int64
+      responses:
+        200:
+          description: Successfully fetched category page
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TaskPage'
+        400:
+          description: Invalid task request parameters
+  /v1.0/tasks/{id}:
+    delete:
+      tags:
+        - tasks
+      description: Delete tasks by ID
+      parameters:
+        - name: id
+          in: path
+          description: task id
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        204:
+          description: Successfully deleted task
+        400:
+          description: Invalid request
+    patch:
+      tags:
+        - tasks
+      description: Update fields of the task
+      parameters:
+        - name: id
+          in: path
+          description: task id
+          required: true
+          schema:
+            type: integer
+            format: int64
+      requestBody:
+        description: Update Task
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateTaskRequest'
+      responses:
+        204:
+          description: Successfully updated task
+        400:
+          description: Invalid request
+        404:
+          description: Not found
+    get:
+      tags:
+        - tasks
+      description: Fetches task by ID
+      parameters:
+        - name: id
+          in: path
+          description: task id
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        200:
+          description: Successfully fetched task
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GetTaskResponse'
+        400:
+          description: Invalid request
+        404:
+          description: Task for ID not found
+
 
 components:
   schemas:
@@ -197,3 +374,79 @@ components:
         description:
           type: string
           maximum: 500
+    AddTaskRequest:
+      type: object
+      required:
+        - name
+        - deadline
+        - categoryId
+      properties:
+        name:
+          type: string
+          maximum: 100
+        description:
+          type: string
+          maximum: 500
+        deadline:
+          type: integer
+          format: int64
+          example: 1712365930
+        categoryId:
+          type: integer
+          format: int64
+    UpdateTaskRequest:
+      type: object
+      properties:
+        name:
+          type: string
+          maximum: 100
+        description:
+          type: string
+          maximum: 500
+        deadline:
+          type: integer
+          format: int64
+          example: 1712365930
+        categoryId:
+          type: integer
+          format: int64
+    GetTaskResponse:
+      type: object
+      required:
+        - name
+        - deadline
+        - category
+      properties:
+        name:
+          type: string
+          maximum: 100
+        description:
+          type: string
+          maximum: 500
+        deadline:
+          type: integer
+          format: int64
+          example: 1712365930
+        category:
+          $ref: '#/components/schemas/GetTaskCategoryResponse'
+    TaskPage:
+      type: object
+      required:
+        - pageNumber
+        - pageSize
+        - totalElements
+        - totalPages
+        - tasks
+      properties:
+        pageNumber:
+          type: integer
+        pageSize:
+          type: integer
+        totalElements:
+          type: integer
+        totalPages:
+          type: integer
+        categories:
+          type: array
+          items:
+            $ref: '#/components/schemas/GetTaskResponse'

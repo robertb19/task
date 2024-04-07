@@ -4,6 +4,6 @@ public final class RestConstant {
 
     private RestConstant(){}
 
-    static final String VERSION_NUMBER_PATH = "/v1.0";
+    public static final String VERSION_NUMBER_PATH = "/v1.0";
 
 }
