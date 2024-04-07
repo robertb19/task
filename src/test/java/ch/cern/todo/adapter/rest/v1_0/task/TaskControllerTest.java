@@ -3,18 +3,16 @@ package ch.cern.todo.adapter.rest.v1_0.task;
 import ch.cern.todo.adapter.rest.v1_0.request.ErrorResponse;
 import ch.cern.todo.adapter.rest.v1_0.request.GenericAddResourceResponse;
 import ch.cern.todo.adapter.rest.v1_0.request.ListErrorResponse;
-import ch.cern.todo.adapter.rest.v1_0.task.category.request.UpdateTaskCategoryRequest;
 import ch.cern.todo.adapter.rest.v1_0.task.request.AddTaskRequest;
 import ch.cern.todo.adapter.rest.v1_0.task.request.UpdateTaskRequest;
+import ch.cern.todo.adapter.rest.v1_0.task.response.GetTaskResponse;
 import ch.cern.todo.core.application.TaskService;
 import ch.cern.todo.core.application.command.dto.AddTaskCommand;
-import ch.cern.todo.core.application.command.dto.DeleteTaskCategoryCommand;
-import ch.cern.todo.core.application.command.dto.UpdateTaskCategoryCommand;
 import ch.cern.todo.core.application.command.dto.UpdateTaskCommand;
-import ch.cern.todo.core.application.exception.DuplicateTaskCategoryException;
 import ch.cern.todo.core.application.exception.TaskCategoryNotFoundException;
 import ch.cern.todo.core.application.exception.TaskNotFoundException;
-import ch.cern.todo.core.application.exception.TaskRecordsMappedException;
+import ch.cern.todo.core.application.query.dto.TaskCategoryProjection;
+import ch.cern.todo.core.application.query.dto.TaskProjection;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.micrometer.common.util.StringUtils;
 import org.junit.jupiter.api.BeforeEach;
@@ -37,12 +35,13 @@ import util.TestUtils;
 
 import java.time.Clock;
 import java.time.Instant;
+import java.time.ZoneId;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Stream;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsInAnyOrder;
-import static org.hamcrest.Matchers.in;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.when;
@@ -175,6 +174,28 @@ class TaskControllerTest {
         }
     }
 
+    @ParameterizedTest
+    @MethodSource("provideRequestsAndResponsesForGetById")
+    void givenId_whenGetById_returnAppropriateResponses(final Long id,
+                                                        final TaskProjection taskProjection,
+                                                        final int statusCode,
+                                                        final Object response) throws Exception {
+        //when
+        if (statusCode == 200) {
+            when(taskService.getTask(id)).thenReturn(Optional.of(taskProjection));
+        }
+
+        final RequestBuilder requestBuilder = MockMvcRequestBuilders.get("/v1.0/tasks/" + id);
+
+        final MvcResult result = mockMvc.perform(requestBuilder).andReturn();
+
+        //then
+        assertEquals(statusCode, result.getResponse().getStatus());
+        if (statusCode == 200) {
+            assertEquals(objectMapper.writeValueAsString(response), result.getResponse().getContentAsString());
+        }
+    }
+
     private static Stream<Arguments> provideRequestsAndResponsesForCreate() {
         final AddTaskRequest validRequest = new AddTaskRequest("name", "description", Instant.now().plusSeconds(1000L), 1L);
         final GenericAddResourceResponse validResponse = new GenericAddResourceResponse(1L);
@@ -253,4 +274,25 @@ class TaskControllerTest {
                 updateTaskRequest.categoryId());
     }
 
+    private static Stream<Arguments> provideRequestsAndResponsesForGetById() {
+        final Instant now = Instant.now();
+        final TaskCategoryProjection taskCategoryProjection = new TaskCategoryProjection(1L, "name", "description");
+        final TaskProjection validProjection = new TaskProjection(
+                1L,
+                "name",
+                "description",
+                now.atZone(ZoneId.of("UTC")),
+                taskCategoryProjection);
+        final GetTaskResponse validResponse = new GetTaskResponse(validProjection.id(),
+                validProjection.name(),
+                validProjection.description(),
+                validProjection.deadline(),
+                validProjection.category());
+
+        return Stream.of(
+                Arguments.of(1L, validProjection, 200, validResponse),
+                Arguments.of(null, null, 400, null),
+                Arguments.of(1L, null, 404, null)
+        );
+    }
 }
