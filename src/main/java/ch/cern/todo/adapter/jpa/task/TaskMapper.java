@@ -13,14 +13,14 @@ final class TaskMapper {
     }
 
     static Task toTask(final TaskEntity taskEntity) {
-        return new Task(taskEntity.getId(), taskEntity.getName(), taskEntity.getDescription(), taskEntity.getDeadline(), taskEntity.getTaskCategory().getId());
+        return new Task(taskEntity.getId(), taskEntity.getName(), taskEntity.getDescription(), taskEntity.getDeadline(), taskEntity.getCategory().getId());
     }
     static TaskProjection toTaskProjection(final TaskEntity taskEntity) {
         return new TaskProjection(taskEntity.getId(),
                 taskEntity.getName(),
                 taskEntity.getDescription(),
                 taskEntity.getDeadline(),
-                TaskCategoryMapper.toTaskCategoryProjection(taskEntity.getTaskCategory()));
+                TaskCategoryMapper.toTaskCategoryProjection(taskEntity.getCategory()));
     }
 
 

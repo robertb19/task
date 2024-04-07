@@ -97,6 +97,7 @@ public class TaskCategoryRepository implements TaskCategoryWriteStore, TaskCateg
                 .toList(), taskCategoryEntityPage.getTotalElements(), taskCategoryEntityPage.getTotalPages());
     }
 
+    //todo to change to criteria builder
     @Override
     public CustomPage<TaskCategoryProjection> getTaskCategoriesByName(final TaskCategoryFilters taskCategoryFilters) {
         final Sort sort = getSorting(taskCategoryFilters.sortDirection());
@@ -127,7 +128,7 @@ public class TaskCategoryRepository implements TaskCategoryWriteStore, TaskCateg
             return Optional.of(TaskCategoryMapper.toTaskCategory(entity));
     }
 
-    private Sort getSorting(SortDirection sortDirection) {
+    private Sort getSorting(final SortDirection sortDirection) {
         return sortDirection == SortDirection.ASC ?
                 Sort.by("id").ascending() :
                 Sort.by("id").descending();

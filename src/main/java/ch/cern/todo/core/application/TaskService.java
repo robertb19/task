@@ -5,6 +5,8 @@ import ch.cern.todo.core.application.command.dto.AddTaskCommand;
 import ch.cern.todo.core.application.command.dto.DeleteTaskCommand;
 import ch.cern.todo.core.application.command.dto.UpdateTaskCommand;
 import ch.cern.todo.core.application.query.TaskQueryHandler;
+import ch.cern.todo.core.application.query.dto.CustomPage;
+import ch.cern.todo.core.application.query.dto.TaskFilters;
 import ch.cern.todo.core.application.query.dto.TaskProjection;
 import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
@@ -34,8 +36,12 @@ public class TaskService {
         taskCommandHandler.handleUpdateTask(updateTaskCommand);
     }
 
-    public Optional<TaskProjection> getTask(Long id) {
+    public Optional<TaskProjection> getTask(final Long id) {
         return taskQueryHandler.handleGetTaskCategory(id);
+    }
+
+    public CustomPage<TaskProjection> getTasks(final TaskFilters taskFilters) {
+        return taskQueryHandler.handleGetTasks(taskFilters);
     }
 
 }

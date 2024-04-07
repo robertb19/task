@@ -1,8 +1,10 @@
 package ch.cern.todo.adapter.rest.v1_0.task;
 
+import ch.cern.todo.adapter.rest.v1_0.request.CommonPage;
 import ch.cern.todo.adapter.rest.v1_0.request.ErrorResponse;
 import ch.cern.todo.adapter.rest.v1_0.request.GenericAddResourceResponse;
 import ch.cern.todo.adapter.rest.v1_0.request.ListErrorResponse;
+import ch.cern.todo.adapter.rest.v1_0.task.category.response.GetTaskCategoryResponse;
 import ch.cern.todo.adapter.rest.v1_0.task.request.AddTaskRequest;
 import ch.cern.todo.adapter.rest.v1_0.task.request.UpdateTaskRequest;
 import ch.cern.todo.adapter.rest.v1_0.task.response.GetTaskResponse;
@@ -11,8 +13,7 @@ import ch.cern.todo.core.application.command.dto.AddTaskCommand;
 import ch.cern.todo.core.application.command.dto.UpdateTaskCommand;
 import ch.cern.todo.core.application.exception.TaskCategoryNotFoundException;
 import ch.cern.todo.core.application.exception.TaskNotFoundException;
-import ch.cern.todo.core.application.query.dto.TaskCategoryProjection;
-import ch.cern.todo.core.application.query.dto.TaskProjection;
+import ch.cern.todo.core.application.query.dto.*;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.micrometer.common.util.StringUtils;
 import org.junit.jupiter.api.BeforeEach;
@@ -30,14 +31,16 @@ import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.RequestBuilder;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
+import org.springframework.util.MultiValueMap;
+import org.springframework.util.MultiValueMapAdapter;
 import org.springframework.web.context.WebApplicationContext;
 import util.TestUtils;
 
 import java.time.Clock;
 import java.time.Instant;
 import java.time.ZoneId;
-import java.util.Optional;
-import java.util.Set;
+import java.time.ZonedDateTime;
+import java.util.*;
 import java.util.stream.Stream;
 
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -196,6 +199,30 @@ class TaskControllerTest {
         }
     }
 
+    @ParameterizedTest
+    @MethodSource("provideRequestsAndResponsesForGet")
+    void givenGetTaskCategoriesRequest_whenGet_returnAppropriateResponses(final MultiValueMap<String, String> multiValueMap,
+                                                                          final TaskFilters taskFilters,
+                                                                          final CustomPage<TaskProjection> taskProjectionCustomPage,
+                                                                          final int statusCode,
+                                                                          final Object response) throws Exception {
+        //when
+        if (statusCode == 200) {
+            when(taskService.getTasks(taskFilters)).thenReturn(taskProjectionCustomPage);
+        }
+
+        final RequestBuilder requestBuilder = MockMvcRequestBuilders.get("/v1.0/tasks")
+                .queryParams(multiValueMap);
+
+        final MvcResult result = mockMvc.perform(requestBuilder).andReturn();
+
+        //then
+        assertEquals(statusCode, result.getResponse().getStatus());
+        if(response != null) {
+            assertEquals(objectMapper.writeValueAsString(response), result.getResponse().getContentAsString());
+        }
+    }
+
     private static Stream<Arguments> provideRequestsAndResponsesForCreate() {
         final AddTaskRequest validRequest = new AddTaskRequest("name", "description", Instant.now().plusSeconds(1000L), 1L);
         final GenericAddResourceResponse validResponse = new GenericAddResourceResponse(1L);
@@ -287,12 +314,97 @@ class TaskControllerTest {
                 validProjection.name(),
                 validProjection.description(),
                 validProjection.deadline(),
-                validProjection.category());
+                new GetTaskCategoryResponse(validProjection.category().id(), validProjection.category().name(), validProjection.category().description()));
 
         return Stream.of(
                 Arguments.of(1L, validProjection, 200, validResponse),
                 Arguments.of(null, null, 400, null),
                 Arguments.of(1L, null, 404, null)
+        );
+    }
+
+    private static Stream<Arguments> provideRequestsAndResponsesForGet() {
+        final Instant instant = Instant.ofEpochSecond(1712512060);
+        final ZonedDateTime zonedDateTime = instant.atZone(ZoneId.of("Z"));
+
+        //all params
+        final MultiValueMap<String, String> allParameters = new MultiValueMapAdapter<>(new HashMap<>() {{
+            put("page", List.of("0"));
+            put("size", List.of("5"));
+            put("name", List.of("name"));
+            put("sort", List.of("ASC"));
+            put("deadlineDate", List.of(String.valueOf(Long.valueOf(instant.getEpochSecond()))));
+            put("deadlineMode", List.of("AFTER"));
+            put("category", List.of("1"));
+        }});
+        final TaskFilters taskFilters = new TaskFilters("name", 1L, zonedDateTime, DeadlineMode.AFTER, 0, 5, SortDirection.ASC);
+        final TaskCategoryProjection taskCategoryProjection = new TaskCategoryProjection(1L, "name", "description");
+        final GetTaskCategoryResponse taskCategoryResponse = new GetTaskCategoryResponse(1L, "name", "description");
+        final CustomPage<TaskProjection> taskProjection = new CustomPage<>(
+                List.of(
+                        new TaskProjection(1L, "name", "description", zonedDateTime, taskCategoryProjection)
+                ), 1, 1
+        );
+        final CommonPage<GetTaskResponse> validResponse = new CommonPage<>(0, 5, 1, 1,
+                List.of(
+                        new GetTaskResponse(1L, "name", "description", zonedDateTime, taskCategoryResponse)
+                ));
+        //all params
+
+        //params all non default
+        final MultiValueMap<String, String> allNonDefaultParameters = new MultiValueMapAdapter<>(new HashMap<>() {{
+            put("page", List.of("0"));
+        }});
+        final TaskFilters allNonDefaultFilters = new TaskFilters(null, null, null, DeadlineMode.AFTER, 0, 10, SortDirection.DESC);
+        final CommonPage<GetTaskResponse> validNonDefaultParametersResponse = new CommonPage<>(0, 10, 1, 1,
+                List.of(
+                        new GetTaskResponse(1L, "name", "description", zonedDateTime, taskCategoryResponse)
+                ));
+        //params all non default
+
+        //params with empty page
+        final MultiValueMap<String, String> parametersWithNameForEmptyPage = new MultiValueMapAdapter<>(new HashMap<>() {{
+            put("page", List.of("0"));
+        }});
+        final TaskFilters emptyPageFilters = new TaskFilters(null, null, null, DeadlineMode.AFTER, 0, 10, SortDirection.DESC);
+        final CustomPage<TaskProjection> emptyTaskProjection = new CustomPage<>(Collections.emptyList(), 0, 0);
+        final CommonPage<GetTaskResponse> emptyPageResponse = new CommonPage<>(0, 10, 0, 0, Collections.emptyList());
+        //params with empty page end
+
+        //invalid params as page is missing
+        final MultiValueMap<String, String> pageMissing = new MultiValueMapAdapter<>(new HashMap<>() {{
+            put("size", List.of("5"));
+            put("name", List.of("name"));
+            put("sort", List.of("ASC"));
+            put("deadlineDate", List.of(String.valueOf(Long.valueOf(instant.getEpochSecond()))));
+            put("deadlineMode", List.of("AFTER"));
+            put("category", List.of("1"));
+        }});
+        final ListErrorResponse invalidResponse = new ListErrorResponse(
+                Set.of("Page must be specified as request param"));
+        //invalid params as page is missing end
+
+        //invalid params as specified deadline mode in invalid
+        final MultiValueMap<String, String> deadlineModeInvalid = new MultiValueMapAdapter<>(new HashMap<>() {{
+            put("page", List.of("0"));
+            put("deadlineMode", List.of("INVALID"));
+        }});
+        //invalid params as page is missing end
+
+        //invalid params as specified sort direction is invalid
+        final MultiValueMap<String, String> sortDirectionInvalid = new MultiValueMapAdapter<>(new HashMap<>() {{
+            put("page", List.of("0"));
+            put("sort", List.of("INVALID"));
+        }});
+        //invalid params as page is missing end
+
+        return Stream.of(
+                Arguments.of(allParameters, taskFilters, taskProjection, 200, validResponse),
+                Arguments.of(allNonDefaultParameters, allNonDefaultFilters, taskProjection, 200, validNonDefaultParametersResponse),
+                Arguments.of(parametersWithNameForEmptyPage, emptyPageFilters, emptyTaskProjection, 200, emptyPageResponse),
+                Arguments.of(pageMissing, null, null, 400, invalidResponse),
+                Arguments.of(deadlineModeInvalid, null, null, 400, null),
+                Arguments.of(sortDirectionInvalid, null, null, 400, null)
         );
     }
 }

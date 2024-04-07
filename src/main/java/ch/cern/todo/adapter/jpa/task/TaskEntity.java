@@ -33,7 +33,7 @@ public class TaskEntity {
 
     @ManyToOne
     @JoinColumn(name="CATEGORY_ID")
-    private TaskCategoryEntity taskCategory;
+    private TaskCategoryEntity category;
 
     public TaskEntity(String name, String description, ZonedDateTime deadline) {
         this.name = name;

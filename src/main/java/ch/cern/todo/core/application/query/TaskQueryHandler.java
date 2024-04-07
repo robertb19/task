@@ -1,5 +1,7 @@
 package ch.cern.todo.core.application.query;
 import ch.cern.todo.core.application.port.TaskReadStore;
+import ch.cern.todo.core.application.query.dto.CustomPage;
+import ch.cern.todo.core.application.query.dto.TaskFilters;
 import ch.cern.todo.core.application.query.dto.TaskProjection;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Component;
@@ -16,5 +18,8 @@ public class TaskQueryHandler {
         return taskReadStore.getTask(id);
     }
 
+    public CustomPage<TaskProjection> handleGetTasks(final TaskFilters taskFilters) {
+        return taskReadStore.getTasks(taskFilters);
+    }
 
 }

@@ -1,5 +1,6 @@
 package ch.cern.todo.adapter.rest.v1_0.task;
 
+import ch.cern.todo.adapter.rest.v1_0.request.CommonPage;
 import ch.cern.todo.adapter.rest.v1_0.request.GenericAddResourceResponse;
 import ch.cern.todo.adapter.rest.v1_0.task.request.AddTaskRequest;
 import ch.cern.todo.adapter.rest.v1_0.task.request.UpdateTaskRequest;
@@ -8,7 +9,9 @@ import ch.cern.todo.core.application.TaskService;
 import ch.cern.todo.core.application.command.dto.AddTaskCommand;
 import ch.cern.todo.core.application.command.dto.DeleteTaskCommand;
 import ch.cern.todo.core.application.command.dto.UpdateTaskCommand;
+import ch.cern.todo.core.application.query.dto.*;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -16,6 +19,7 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.Clock;
+import java.time.Instant;
 
 import static ch.cern.todo.adapter.rest.v1_0.RestConstant.VERSION_NUMBER_PATH;
 
@@ -67,6 +71,30 @@ public class TaskController {
         return taskService.getTask(id)
                 .map(taskProjection -> ResponseEntity.ok(GetTaskResponse.from(taskProjection)))
                 .orElseGet(() -> ResponseEntity.notFound().build());
+    }
+
+    @GetMapping
+    public ResponseEntity<CommonPage<GetTaskResponse>> get(@RequestParam(value = "page", required = false) @NotNull(message = "Page must be specified as request param") final Integer page,
+                                                           @RequestParam(value = "size", defaultValue = "10") final int size,
+                                                           @RequestParam(value = "sort", defaultValue = "DESC") final SortDirection sort,
+                                                           @RequestParam(value = "name", required = false) final String name,
+                                                           @RequestParam(value = "deadlineDate", required = false) final Long deadline,
+                                                           @RequestParam(value="deadlineMode", required = false, defaultValue = "AFTER") final DeadlineMode deadlineMode,
+                                                           @RequestParam(value="category", required = false) final Long category) {
+        final CustomPage<TaskProjection> tasksPage = taskService.getTasks(
+                new TaskFilters(name,
+                        category,
+                        deadline != null ? Instant.ofEpochSecond(deadline).atZone(clock.getZone()) : null,
+                        deadlineMode,
+                        page,
+                        size,
+                        sort
+                ));
+
+        return ResponseEntity.ok(new CommonPage<>(page, size, tasksPage.getTotalElements(), tasksPage.getTotalPages(),
+                tasksPage.getElements().stream()
+                        .map(GetTaskResponse::from)
+                        .toList()));
     }
 
 }

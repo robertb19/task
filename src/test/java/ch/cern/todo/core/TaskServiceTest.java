@@ -6,8 +6,7 @@ import ch.cern.todo.core.application.command.dto.AddTaskCommand;
 import ch.cern.todo.core.application.command.dto.DeleteTaskCommand;
 import ch.cern.todo.core.application.command.dto.UpdateTaskCommand;
 import ch.cern.todo.core.application.query.TaskQueryHandler;
-import ch.cern.todo.core.application.query.dto.TaskCategoryProjection;
-import ch.cern.todo.core.application.query.dto.TaskProjection;
+import ch.cern.todo.core.application.query.dto.*;
 import ch.cern.todo.core.domain.Task;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -17,6 +16,8 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.time.Instant;
 import java.time.ZoneId;
+import java.time.ZonedDateTime;
+import java.util.List;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -103,6 +104,30 @@ class TaskServiceTest {
         //then
         assertTrue(result.isPresent());
         assertEquals(taskProjection, result.get());
+    }
+
+    @Test
+    void givenTaskFilters_whenGetTasks_returnTaskProjectionPage() {
+        //given
+        final Instant now = Instant.now();
+        final ZonedDateTime zonedDateTime = now.atZone(ZoneId.of("UTC"));
+        final TaskCategoryProjection taskCategoryProjection = new TaskCategoryProjection(1L, "name", "description");
+        final TaskProjection taskProjection = new TaskProjection(
+                1L,
+                "name",
+                "description",
+                now.atZone(ZoneId.of("UTC")),
+                taskCategoryProjection);
+        final CustomPage<TaskProjection> expected = new CustomPage<>(List.of(taskProjection), 10, 2);
+        final TaskFilters filters = new TaskFilters("name", 1L, zonedDateTime, DeadlineMode.AFTER, 0, 5, SortDirection.ASC);
+
+
+        //when
+        when(taskQueryHandler.handleGetTasks(filters)).thenReturn(expected);
+        final CustomPage<TaskProjection> result = taskService.getTasks(filters);
+
+        //then
+        assertEquals(expected, result);
     }
 
 }

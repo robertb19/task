@@ -216,14 +216,14 @@ paths:
             format: int64
         - name: deadlineMode
           in: query
-          description: Deadline mode (co-operates with deadlineDate)
+          description: Deadline mode (co-operates with deadlineDate), before or after deadline
           required: false
           schema:
             type: string
             enum:
               - BEFORE
               - AFTER
-            default: BEFORE
+            default: AFTER
         - name: category
           in: query
           description: Category id
