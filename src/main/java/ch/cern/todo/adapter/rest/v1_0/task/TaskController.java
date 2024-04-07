@@ -33,14 +33,13 @@ public class TaskController {
 
     private final Clock clock;
 
-    //todo change to mappers & use builders in mapper as many parameters present
     @PostMapping
     public ResponseEntity<GenericAddResourceResponse> create(@RequestBody @Valid AddTaskRequest addTaskRequest) {
-        final Long createdId = taskService
-                .addTask(new AddTaskCommand(addTaskRequest.name(),
-                        addTaskRequest.description(),
-                        addTaskRequest.deadline().atZone(clock.getZone()),
-                        addTaskRequest.categoryId()));
+        final Long createdId = taskService.addTask(AddTaskCommand.builder()
+                .name(addTaskRequest.name())
+                .description(addTaskRequest.description())
+                .deadline(addTaskRequest.deadline().atZone(clock.getZone()))
+                .categoryId(addTaskRequest.categoryId()).build());
 
         return new ResponseEntity<>(new GenericAddResourceResponse(createdId), HttpStatus.CREATED);
     }
@@ -51,17 +50,16 @@ public class TaskController {
         return ResponseEntity.noContent().build();
     }
 
-    //todo change to mappers & use builders in mapper as many parameters present
     @PatchMapping("/{id}")
     public ResponseEntity<Void> update(@PathVariable("id") final Long id,
                                        @RequestBody @Valid UpdateTaskRequest updateTaskRequest) {
-        taskService.updateTask(new UpdateTaskCommand(
-                id,
-                updateTaskRequest.name(),
-                updateTaskRequest.description(),
-                updateTaskRequest.deadline() != null ? updateTaskRequest.deadline().atZone(clock.getZone()) : null,
-                updateTaskRequest.categoryId()
-        ));
+
+        taskService.updateTask(UpdateTaskCommand.builder()
+                .id(id)
+                .name(updateTaskRequest.name())
+                .description(updateTaskRequest.description())
+                .deadline(updateTaskRequest.deadline() != null ? updateTaskRequest.deadline().atZone(clock.getZone()) : null)
+                .categoryId(updateTaskRequest.categoryId()).build());
 
         return ResponseEntity.noContent().build();
     }
@@ -79,17 +77,17 @@ public class TaskController {
                                                            @RequestParam(value = "sort", defaultValue = "DESC") final SortDirection sort,
                                                            @RequestParam(value = "name", required = false) final String name,
                                                            @RequestParam(value = "deadlineDate", required = false) final Long deadline,
-                                                           @RequestParam(value="deadlineMode", required = false, defaultValue = "AFTER") final DeadlineMode deadlineMode,
-                                                           @RequestParam(value="category", required = false) final Long category) {
-        final CustomPage<TaskProjection> tasksPage = taskService.getTasks(
-                new TaskFilters(name,
-                        category,
-                        deadline != null ? Instant.ofEpochSecond(deadline).atZone(clock.getZone()) : null,
-                        deadlineMode,
-                        page,
-                        size,
-                        sort
-                ));
+                                                           @RequestParam(value = "deadlineMode", required = false, defaultValue = "AFTER") final DeadlineMode deadlineMode,
+                                                           @RequestParam(value = "category", required = false) final Long category) {
+        final CustomPage<TaskProjection> tasksPage = taskService.getTasks(TaskFilters.builder()
+                .name(name)
+                .categoryId(category)
+                .deadline(deadline != null ? Instant.ofEpochSecond(deadline).atZone(clock.getZone()) : null)
+                .deadlineMode(deadlineMode)
+                .pageNumber(page)
+                .pageSize(size)
+                .sortDirection(sort)
+                .build());
 
         return ResponseEntity.ok(new CommonPage<>(page, size, tasksPage.getTotalElements(), tasksPage.getTotalPages(),
                 tasksPage.getElements().stream()
