@@ -71,40 +71,11 @@ public class TaskRepository implements TaskWriteStore, TaskReadStore {
 
     public CustomPage<TaskProjection> getTasks(final TaskFilters taskFilters) {
         final CriteriaBuilder criteriaBuilder = entityManager.getCriteriaBuilder();
-        final CriteriaQuery<TaskEntity> criteriaQuery = criteriaBuilder.createQuery(TaskEntity.class);
-
-        final Root<TaskEntity> root = criteriaQuery.from(TaskEntity.class);
-        //todo check if necessary
-        root.join("category", JoinType.INNER);
-
-        final Set<Predicate> pagePredicates = getTaskPredicates(taskFilters, root, criteriaBuilder);
-        criteriaQuery.where(criteriaBuilder.and(pagePredicates.toArray(new Predicate[pagePredicates.size()])));
-        criteriaQuery.orderBy(getSorting(criteriaBuilder, root, taskFilters.sortDirection()));
-
-        final int offset = taskFilters.pageNumber() * taskFilters.pageSize();
-        final List<TaskEntity> taskEntities = entityManager.createQuery(criteriaQuery)
-                .setMaxResults(taskFilters.pageSize())
-                .setFirstResult(offset)
-                .getResultList();
-
-        final CriteriaQuery<Long> countQuery = criteriaBuilder.createQuery(Long.class);
-        final Root<TaskEntity> taskCountRoot = countQuery.from(TaskEntity.class);
-        final Set<Predicate> countPredicates = getTaskPredicates(taskFilters, taskCountRoot, criteriaBuilder);
-        countQuery.select(criteriaBuilder.count(taskCountRoot))
-                .where(criteriaBuilder.and(countPredicates.toArray(new Predicate[countPredicates.size()])));
-        final Long count = entityManager.createQuery(countQuery).getSingleResult();
-
-        //todo to separate function and verify
-        int totalPages;
-        if(taskFilters.pageSize() == 0) {
-            totalPages = 0;
-        } else {
-            totalPages = count % taskFilters.pageSize() == 0 ? (int) (count / (taskFilters.pageSize())) : (int) (count / taskFilters.pageSize()) + 1;
-        }
-
+        final List<TaskEntity> taskEntities = getFilteredEntities(criteriaBuilder, taskFilters);
+        final Long count = getFilteredCount(criteriaBuilder, taskFilters);
         return new CustomPage<>(taskEntities.stream()
                 .map(TaskMapper::toTaskProjection)
-                .toList(), count, totalPages);
+                .toList(), count, getTotalPages(taskFilters, count));
     }
 
     private Optional<TaskCategoryEntity> findForUpdate(final Task task) {
@@ -128,6 +99,31 @@ public class TaskRepository implements TaskWriteStore, TaskReadStore {
 
         taskCategoryEntity.ifPresent(entity::setCategory);
         return Optional.of(TaskMapper.toTask(entity));
+    }
+
+    private List<TaskEntity> getFilteredEntities(final CriteriaBuilder criteriaBuilder, final TaskFilters taskFilters) {
+        final CriteriaQuery<TaskEntity> criteriaQuery = criteriaBuilder.createQuery(TaskEntity.class);
+
+        final Root<TaskEntity> root = criteriaQuery.from(TaskEntity.class);
+
+        final Set<Predicate> pagePredicates = getTaskPredicates(taskFilters, root, criteriaBuilder);
+        criteriaQuery.where(criteriaBuilder.and(pagePredicates.toArray(new Predicate[pagePredicates.size()])));
+        criteriaQuery.orderBy(getSorting(criteriaBuilder, root, taskFilters.sortDirection()));
+
+        final int offset = taskFilters.pageNumber() * taskFilters.pageSize();
+        return entityManager.createQuery(criteriaQuery)
+                .setMaxResults(taskFilters.pageSize())
+                .setFirstResult(offset)
+                .getResultList();
+    }
+
+    private Long getFilteredCount(final CriteriaBuilder criteriaBuilder, final TaskFilters taskFilters) {
+        final CriteriaQuery<Long> countQuery = criteriaBuilder.createQuery(Long.class);
+        final Root<TaskEntity> root = countQuery.from(TaskEntity.class);
+        final Set<Predicate> countPredicates = getTaskPredicates(taskFilters, root, criteriaBuilder);
+        countQuery.select(criteriaBuilder.count(root))
+                .where(criteriaBuilder.and(countPredicates.toArray(new Predicate[countPredicates.size()])));
+        return entityManager.createQuery(countQuery).getSingleResult();
     }
 
     private Order getSorting(final CriteriaBuilder criteriaBuilder, final Root<TaskEntity> taskEntityRoot, final SortDirection sortDirection) {
@@ -159,6 +155,14 @@ public class TaskRepository implements TaskWriteStore, TaskReadStore {
         }
 
         return predicates;
+    }
+
+    private int getTotalPages(final TaskFilters taskFilters, final Long count) {
+        if(taskFilters.pageSize() == 0) {
+            return 0;
+        } else {
+            return count % taskFilters.pageSize() == 0 ? (int) (count / (taskFilters.pageSize())) : (int) (count / taskFilters.pageSize()) + 1;
+        }
     }
 
 }
