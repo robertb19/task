@@ -8,12 +8,17 @@ import ch.cern.todo.adapter.rest.v1_0.task.category.response.GetTaskCategoryResp
 import ch.cern.todo.adapter.rest.v1_0.task.request.AddTaskRequest;
 import ch.cern.todo.adapter.rest.v1_0.task.request.UpdateTaskRequest;
 import ch.cern.todo.adapter.rest.v1_0.task.response.GetTaskResponse;
-import ch.cern.todo.core.application.TaskService;
-import ch.cern.todo.core.application.command.dto.AddTaskCommand;
-import ch.cern.todo.core.application.command.dto.UpdateTaskCommand;
-import ch.cern.todo.core.application.exception.TaskCategoryNotFoundException;
-import ch.cern.todo.core.application.exception.TaskNotFoundException;
-import ch.cern.todo.core.application.query.dto.*;
+import ch.cern.todo.core.application.dto.CustomPage;
+import ch.cern.todo.core.application.dto.SortDirection;
+import ch.cern.todo.core.application.task.TaskService;
+import ch.cern.todo.core.application.task.category.exception.TaskCategoryNotFoundException;
+import ch.cern.todo.core.application.task.category.query.dto.TaskCategoryProjection;
+import ch.cern.todo.core.application.task.command.dto.AddTaskCommand;
+import ch.cern.todo.core.application.task.command.dto.UpdateTaskCommand;
+import ch.cern.todo.core.application.task.exception.TaskNotFoundException;
+import ch.cern.todo.core.application.task.query.dto.DeadlineMode;
+import ch.cern.todo.core.application.task.query.dto.TaskFilters;
+import ch.cern.todo.core.application.task.query.dto.TaskProjection;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.micrometer.common.util.StringUtils;
 import org.junit.jupiter.api.BeforeEach;
@@ -292,7 +297,7 @@ class TaskControllerTest {
                 addTaskRequest.categoryId());
     }
 
-    private UpdateTaskCommand toUpdateTaskCommand(final Long id,final UpdateTaskRequest updateTaskRequest) {
+    private UpdateTaskCommand toUpdateTaskCommand(final Long id, final UpdateTaskRequest updateTaskRequest) {
         return new UpdateTaskCommand(
                 id,
                 updateTaskRequest.name(),

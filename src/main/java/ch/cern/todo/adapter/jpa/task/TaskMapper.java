@@ -1,7 +1,7 @@
 package ch.cern.todo.adapter.jpa.task;
 
 import ch.cern.todo.adapter.jpa.task.category.TaskCategoryMapper;
-import ch.cern.todo.core.application.query.dto.TaskProjection;
+import ch.cern.todo.core.application.task.query.dto.TaskProjection;
 import ch.cern.todo.core.domain.Task;
 
 final class TaskMapper {

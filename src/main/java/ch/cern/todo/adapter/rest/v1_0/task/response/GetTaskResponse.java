@@ -1,7 +1,7 @@
 package ch.cern.todo.adapter.rest.v1_0.task.response;
 
 import ch.cern.todo.adapter.rest.v1_0.task.category.response.GetTaskCategoryResponse;
-import ch.cern.todo.core.application.query.dto.TaskProjection;
+import ch.cern.todo.core.application.task.query.dto.TaskProjection;
 import com.fasterxml.jackson.annotation.JsonFormat;
 
 import java.time.ZonedDateTime;

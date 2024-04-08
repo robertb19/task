@@ -2,10 +2,11 @@ package ch.cern.todo.adapter.jpa.task;
 
 import ch.cern.todo.adapter.jpa.task.category.TaskCategoryEntity;
 import ch.cern.todo.adapter.jpa.task.category.TaskCategoryRepositoryJpa;
-import ch.cern.todo.core.application.exception.TaskCategoryNotFoundException;
-import ch.cern.todo.core.application.port.TaskReadStore;
-import ch.cern.todo.core.application.port.TaskWriteStore;
-import ch.cern.todo.core.application.query.dto.*;
+import ch.cern.todo.core.application.dto.CustomPage;
+import ch.cern.todo.core.application.task.category.exception.TaskCategoryNotFoundException;
+import ch.cern.todo.core.application.task.port.TaskReadStore;
+import ch.cern.todo.core.application.task.port.TaskWriteStore;
+import ch.cern.todo.core.application.task.query.dto.*;
 import ch.cern.todo.core.domain.Task;
 import io.micrometer.common.util.StringUtils;
 import jakarta.persistence.EntityManager;
@@ -19,6 +20,9 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
+
+import static ch.cern.todo.adapter.jpa.task.JpaUtils.getSortingById;
+import static ch.cern.todo.adapter.jpa.task.JpaUtils.getTotalPages;
 
 @Repository
 @AllArgsConstructor
@@ -75,7 +79,7 @@ public class TaskRepository implements TaskWriteStore, TaskReadStore {
         final Long count = getFilteredCount(criteriaBuilder, taskFilters);
         return new CustomPage<>(taskEntities.stream()
                 .map(TaskMapper::toTaskProjection)
-                .toList(), count, getTotalPages(taskFilters, count));
+                .toList(), count, getTotalPages(taskFilters.pageSize(), count));
     }
 
     private Optional<TaskCategoryEntity> findForUpdate(final Task task) {
@@ -108,7 +112,7 @@ public class TaskRepository implements TaskWriteStore, TaskReadStore {
 
         final Set<Predicate> pagePredicates = getTaskPredicates(taskFilters, root, criteriaBuilder);
         criteriaQuery.where(criteriaBuilder.and(pagePredicates.toArray(new Predicate[pagePredicates.size()])));
-        criteriaQuery.orderBy(getSorting(criteriaBuilder, root, taskFilters.sortDirection()));
+        criteriaQuery.orderBy(getSortingById(criteriaBuilder, root, taskFilters.sortDirection()));
 
         final int offset = taskFilters.pageNumber() * taskFilters.pageSize();
         return entityManager.createQuery(criteriaQuery)
@@ -124,12 +128,6 @@ public class TaskRepository implements TaskWriteStore, TaskReadStore {
         countQuery.select(criteriaBuilder.count(root))
                 .where(criteriaBuilder.and(countPredicates.toArray(new Predicate[countPredicates.size()])));
         return entityManager.createQuery(countQuery).getSingleResult();
-    }
-
-    private Order getSorting(final CriteriaBuilder criteriaBuilder, final Root<TaskEntity> taskEntityRoot, final SortDirection sortDirection) {
-        return sortDirection == SortDirection.ASC ?
-                criteriaBuilder.asc(taskEntityRoot.get("id")) :
-                criteriaBuilder.desc(taskEntityRoot.get("id"));
     }
 
     private Set<Predicate> getTaskPredicates(final TaskFilters taskFilters, final Root<TaskEntity> root, final CriteriaBuilder criteriaBuilder) {
@@ -155,14 +153,6 @@ public class TaskRepository implements TaskWriteStore, TaskReadStore {
         }
 
         return predicates;
-    }
-
-    private int getTotalPages(final TaskFilters taskFilters, final Long count) {
-        if(taskFilters.pageSize() == 0) {
-            return 0;
-        } else {
-            return count % taskFilters.pageSize() == 0 ? (int) (count / (taskFilters.pageSize())) : (int) (count / taskFilters.pageSize()) + 1;
-        }
     }
 
 }

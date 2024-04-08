@@ -5,15 +5,14 @@ import ch.cern.todo.adapter.rest.v1_0.task.category.request.UpdateTaskCategoryRe
 import ch.cern.todo.adapter.rest.v1_0.request.CommonPage;
 import ch.cern.todo.adapter.rest.v1_0.request.GenericAddResourceResponse;
 import ch.cern.todo.adapter.rest.v1_0.task.category.response.GetTaskCategoryResponse;
-import ch.cern.todo.core.application.TaskCategoryService;
-import ch.cern.todo.core.application.command.dto.AddTaskCategoryCommand;
-import ch.cern.todo.core.application.command.dto.DeleteTaskCategoryCommand;
-import ch.cern.todo.core.application.command.dto.UpdateTaskCategoryCommand;
-import ch.cern.todo.core.application.query.dto.TaskCategoryProjection;
-import ch.cern.todo.core.application.query.dto.CustomPage;
-import ch.cern.todo.core.application.query.dto.SortDirection;
-import ch.cern.todo.core.application.query.dto.TaskCategoryFilters;
-import io.micrometer.common.util.StringUtils;
+import ch.cern.todo.core.application.task.category.TaskCategoryService;
+import ch.cern.todo.core.application.task.category.command.dto.AddTaskCategoryCommand;
+import ch.cern.todo.core.application.task.category.command.dto.DeleteTaskCategoryCommand;
+import ch.cern.todo.core.application.task.category.command.dto.UpdateTaskCategoryCommand;
+import ch.cern.todo.core.application.task.category.query.dto.TaskCategoryProjection;
+import ch.cern.todo.core.application.dto.CustomPage;
+import ch.cern.todo.core.application.dto.SortDirection;
+import ch.cern.todo.core.application.task.category.query.dto.TaskCategoryFilters;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
@@ -46,9 +45,7 @@ public class TaskCategoryController {
                                           @RequestParam(value = "size", defaultValue = "10") final int size,
                                           @RequestParam(value = "sort", defaultValue = "DESC") final SortDirection sort,
                                           @RequestParam(value = "name", required = false) final String name) {
-        final CustomPage<TaskCategoryProjection> taskCategoriesPage = StringUtils.isNotBlank(name) ?
-                taskCategoryService.getTaskCategoriesByName(new TaskCategoryFilters(name, page, size, sort)) :
-                taskCategoryService.getTaskCategories(new TaskCategoryFilters(name, page, size, sort));
+        final CustomPage<TaskCategoryProjection> taskCategoriesPage = taskCategoryService.getTaskCategories(new TaskCategoryFilters(name, page, size, sort));
 
         return ResponseEntity.ok(new CommonPage<>(page, size, taskCategoriesPage.getTotalElements(), taskCategoriesPage.getTotalPages(),
                 taskCategoriesPage.getElements().stream()

@@ -7,17 +7,17 @@ import ch.cern.todo.adapter.rest.v1_0.request.ListErrorResponse;
 import ch.cern.todo.adapter.rest.v1_0.task.category.request.AddTaskCategoryRequest;
 import ch.cern.todo.adapter.rest.v1_0.task.category.request.UpdateTaskCategoryRequest;
 import ch.cern.todo.adapter.rest.v1_0.task.category.response.*;
-import ch.cern.todo.core.application.TaskCategoryService;
-import ch.cern.todo.core.application.command.dto.AddTaskCategoryCommand;
-import ch.cern.todo.core.application.command.dto.DeleteTaskCategoryCommand;
-import ch.cern.todo.core.application.command.dto.UpdateTaskCategoryCommand;
-import ch.cern.todo.core.application.exception.DuplicateTaskCategoryException;
-import ch.cern.todo.core.application.exception.TaskCategoryNotFoundException;
-import ch.cern.todo.core.application.exception.TaskRecordsMappedException;
-import ch.cern.todo.core.application.query.dto.TaskCategoryProjection;
-import ch.cern.todo.core.application.query.dto.CustomPage;
-import ch.cern.todo.core.application.query.dto.SortDirection;
-import ch.cern.todo.core.application.query.dto.TaskCategoryFilters;
+import ch.cern.todo.core.application.task.category.TaskCategoryService;
+import ch.cern.todo.core.application.task.category.command.dto.AddTaskCategoryCommand;
+import ch.cern.todo.core.application.task.category.command.dto.DeleteTaskCategoryCommand;
+import ch.cern.todo.core.application.task.category.command.dto.UpdateTaskCategoryCommand;
+import ch.cern.todo.core.application.task.category.exception.DuplicateTaskCategoryException;
+import ch.cern.todo.core.application.task.category.exception.TaskCategoryNotFoundException;
+import ch.cern.todo.core.application.task.category.exception.TaskRecordsMappedException;
+import ch.cern.todo.core.application.task.category.query.dto.TaskCategoryProjection;
+import ch.cern.todo.core.application.dto.CustomPage;
+import ch.cern.todo.core.application.dto.SortDirection;
+import ch.cern.todo.core.application.task.category.query.dto.TaskCategoryFilters;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.micrometer.common.util.StringUtils;
 import org.junit.jupiter.api.BeforeEach;
@@ -115,11 +115,7 @@ class TaskCategoryControllerTest {
                                                                           final Object response) throws Exception {
         //when
         if (statusCode == 200) {
-            if (taskCategoryFilters.name() != null) {
-                when(taskCategoryService.getTaskCategoriesByName(taskCategoryFilters)).thenReturn(taskCategoryProjection);
-            } else {
-                when(taskCategoryService.getTaskCategories(taskCategoryFilters)).thenReturn(taskCategoryProjection);
-            }
+            when(taskCategoryService.getTaskCategories(taskCategoryFilters)).thenReturn(taskCategoryProjection);
         }
 
         final RequestBuilder requestBuilder = MockMvcRequestBuilders.get("/v1.0/categories")
