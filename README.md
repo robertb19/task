@@ -7,3 +7,6 @@ Below you may find a proposition of the DB model:
 
 To complete the exercices please implement all missing classes and functonalites in order to be able to store and retrieve information about tasks and their categories.
 Once you are ready, please send it to me (ie link to your git repository) before  our interview.
+
+docker build -t robb/todos:latest -t robb/todos:0.0.1 .
+docker run -p 8080:8080 robb/todos:0.0.1
