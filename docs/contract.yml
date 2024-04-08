@@ -158,7 +158,7 @@ paths:
         - tasks
       description: Create task
       requestBody:
-        description: Task
+        description: Task - deadline should be specified as epoch seconds
         content:
           application/json:
             schema:
