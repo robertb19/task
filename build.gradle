@@ -8,6 +8,7 @@ plugins {
 group = 'ch.cern'
 version = '0.0.1-SNAPSHOT'
 sourceCompatibility = '17'
+targetCompatibility = '17'
 
 repositories {
 	mavenCentral()
@@ -28,9 +29,21 @@ dependencies {
 }
 
 tasks.named('test') {
-	useJUnitPlatform()
-	testLogging {
-		exceptionFormat = 'full'
-		events 'passed', 'skipped', 'failed'
+	useJUnitPlatform {
+		filter {
+			excludeTestsMatching "*IT"
+		}
 	}
+}
+
+def integrationTest = tasks.register("integrationTest", Test) {
+	useJUnitPlatform {
+		filter {
+			includeTestsMatching '*IT'
+		}
+	}
+}
+
+tasks.named('check') {
+	dependsOn integrationTest
 }
