@@ -1,24 +1,30 @@
 package ch.cern.todo.adapter.jpa.task.category;
 
-import ch.cern.todo.core.application.exception.DuplicateTaskCategoryException;
-import ch.cern.todo.core.application.exception.TaskCategoryException;
-import ch.cern.todo.core.application.exception.TaskRecordsMappedException;
-import ch.cern.todo.core.application.port.TaskCategoryReadStore;
-import ch.cern.todo.core.application.port.TaskCategoryWriteStore;
-import ch.cern.todo.core.application.query.dto.TaskCategoryProjection;
-import ch.cern.todo.core.application.query.dto.CustomPage;
-import ch.cern.todo.core.application.query.dto.SortDirection;
-import ch.cern.todo.core.application.query.dto.TaskCategoryFilters;
+import ch.cern.todo.core.application.dto.CustomPage;
+import ch.cern.todo.core.application.task.category.exception.DuplicateTaskCategoryException;
+import ch.cern.todo.core.application.task.category.exception.TaskCategoryException;
+import ch.cern.todo.core.application.task.category.exception.TaskRecordsMappedException;
+import ch.cern.todo.core.application.task.category.port.TaskCategoryReadStore;
+import ch.cern.todo.core.application.task.category.port.TaskCategoryWriteStore;
+import ch.cern.todo.core.application.task.category.query.dto.TaskCategoryFilters;
+import ch.cern.todo.core.application.task.category.query.dto.TaskCategoryProjection;
 import ch.cern.todo.core.domain.TaskCategory;
 import io.micrometer.common.util.StringUtils;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.criteria.*;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.hibernate.exception.ConstraintViolationException;
 import org.springframework.dao.DataIntegrityViolationException;
-import org.springframework.data.domain.*;
 import org.springframework.stereotype.Repository;
 
+import java.util.HashSet;
+import java.util.List;
 import java.util.Optional;
+import java.util.Set;
+
+import static ch.cern.todo.adapter.jpa.task.JpaUtils.getSortingById;
+import static ch.cern.todo.adapter.jpa.task.JpaUtils.getTotalPages;
 
 @Repository
 @AllArgsConstructor
@@ -26,6 +32,8 @@ import java.util.Optional;
 public class TaskCategoryRepository implements TaskCategoryWriteStore, TaskCategoryReadStore {
 
     private final TaskCategoryRepositoryJpa taskCategoryRepositoryJpa;
+
+    private final EntityManager entityManager;
 
     @Override
     public TaskCategory save(final TaskCategory taskCategory) {
@@ -87,27 +95,12 @@ public class TaskCategoryRepository implements TaskCategoryWriteStore, TaskCateg
 
     @Override
     public CustomPage<TaskCategoryProjection> getTaskCategories(final TaskCategoryFilters taskCategoryFilters) {
-        final Sort sort = getSorting(taskCategoryFilters.sortDirection());
-
-        final Page<TaskCategoryEntity> taskCategoryEntityPage =  taskCategoryRepositoryJpa.findAll(
-                PageRequest.of(taskCategoryFilters.pageNumber(), taskCategoryFilters.pageSize(), sort));
-
-        return new CustomPage<>(taskCategoryEntityPage.stream()
+        final CriteriaBuilder criteriaBuilder = entityManager.getCriteriaBuilder();
+        final List<TaskCategoryEntity> taskEntities = getFilteredEntities(criteriaBuilder, taskCategoryFilters);
+        final Long count = getFilteredCount(criteriaBuilder, taskCategoryFilters);
+        return new CustomPage<>(taskEntities.stream()
                 .map(TaskCategoryMapper::toTaskCategoryProjection)
-                .toList(), taskCategoryEntityPage.getTotalElements(), taskCategoryEntityPage.getTotalPages());
-    }
-
-    //todo to change to criteria builder
-    @Override
-    public CustomPage<TaskCategoryProjection> getTaskCategoriesByName(final TaskCategoryFilters taskCategoryFilters) {
-        final Sort sort = getSorting(taskCategoryFilters.sortDirection());
-
-        final Page<TaskCategoryEntity> taskCategoryEntityPage =  taskCategoryRepositoryJpa.findAllByName(taskCategoryFilters.name(),
-                PageRequest.of(taskCategoryFilters.pageNumber(), taskCategoryFilters.pageSize(), sort));
-
-        return new CustomPage<>(taskCategoryEntityPage.stream()
-                .map(TaskCategoryMapper::toTaskCategoryProjection)
-                .toList(), taskCategoryEntityPage.getTotalElements(), taskCategoryEntityPage.getTotalPages());
+                .toList(), count, getTotalPages(taskCategoryFilters.pageSize(), count));
     }
 
     @Override
@@ -128,10 +121,36 @@ public class TaskCategoryRepository implements TaskCategoryWriteStore, TaskCateg
             return Optional.of(TaskCategoryMapper.toTaskCategory(entity));
     }
 
-    private Sort getSorting(final SortDirection sortDirection) {
-        return sortDirection == SortDirection.ASC ?
-                Sort.by("id").ascending() :
-                Sort.by("id").descending();
+    private List<TaskCategoryEntity> getFilteredEntities(final CriteriaBuilder criteriaBuilder, final TaskCategoryFilters taskCategoryFilters) {
+        final CriteriaQuery<TaskCategoryEntity> criteriaQuery = criteriaBuilder.createQuery(TaskCategoryEntity.class);
+        final Root<TaskCategoryEntity> root = criteriaQuery.from(TaskCategoryEntity.class);
+        final Set<Predicate> pagePredicates = getTaskCategoryPredicates(taskCategoryFilters, root, criteriaBuilder);
+        criteriaQuery.where(criteriaBuilder.and(pagePredicates.toArray(new Predicate[pagePredicates.size()])));
+        criteriaQuery.orderBy(getSortingById(criteriaBuilder, root, taskCategoryFilters.sortDirection()));
+        final int offset = taskCategoryFilters.pageNumber() * taskCategoryFilters.pageSize();
+        return entityManager.createQuery(criteriaQuery)
+                .setMaxResults(taskCategoryFilters.pageSize())
+                .setFirstResult(offset)
+                .getResultList();
     }
 
+    private Long getFilteredCount(final CriteriaBuilder criteriaBuilder, final TaskCategoryFilters taskCategoryFilters) {
+        final CriteriaQuery<Long> countQuery = criteriaBuilder.createQuery(Long.class);
+        final Root<TaskCategoryEntity> root = countQuery.from(TaskCategoryEntity.class);
+        final Set<Predicate> countPredicates = getTaskCategoryPredicates(taskCategoryFilters, root, criteriaBuilder);
+        countQuery.select(criteriaBuilder.count(root))
+                .where(criteriaBuilder.and(countPredicates.toArray(new Predicate[countPredicates.size()])));
+        return entityManager.createQuery(countQuery).getSingleResult();
+    }
+
+    private Set<Predicate> getTaskCategoryPredicates(final TaskCategoryFilters taskCategoryFilters, final Root<TaskCategoryEntity> root, final CriteriaBuilder criteriaBuilder) {
+        final Set<Predicate> predicates = new HashSet<>();
+
+        if (taskCategoryFilters.name() != null) {
+            final Path<String> name = root.get("name");
+            predicates.add(criteriaBuilder.equal(name, taskCategoryFilters.name()));
+        }
+
+        return predicates;
+    }
 }

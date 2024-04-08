@@ -1,9 +1,9 @@
 package ch.cern.todo.adapter.rest.v1_0.task.category.exception;
 
 import ch.cern.todo.adapter.rest.v1_0.request.ErrorResponse;
-import ch.cern.todo.core.application.exception.DuplicateTaskCategoryException;
-import ch.cern.todo.core.application.exception.TaskCategoryNotFoundException;
-import ch.cern.todo.core.application.exception.TaskRecordsMappedException;
+import ch.cern.todo.core.application.task.category.exception.DuplicateTaskCategoryException;
+import ch.cern.todo.core.application.task.category.exception.TaskCategoryNotFoundException;
+import ch.cern.todo.core.application.task.category.exception.TaskRecordsMappedException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ControllerAdvice;

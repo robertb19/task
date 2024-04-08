@@ -1,13 +1,16 @@
 package ch.cern.todo.adapter.jpa.task.category;
 
-import ch.cern.todo.core.application.exception.DuplicateTaskCategoryException;
-import ch.cern.todo.core.application.exception.TaskCategoryException;
-import ch.cern.todo.core.application.exception.TaskRecordsMappedException;
-import ch.cern.todo.core.application.query.dto.TaskCategoryProjection;
-import ch.cern.todo.core.application.query.dto.CustomPage;
-import ch.cern.todo.core.application.query.dto.SortDirection;
-import ch.cern.todo.core.application.query.dto.TaskCategoryFilters;
+import ch.cern.todo.core.application.dto.CustomPage;
+import ch.cern.todo.core.application.dto.SortDirection;
+import ch.cern.todo.core.application.task.category.exception.DuplicateTaskCategoryException;
+import ch.cern.todo.core.application.task.category.exception.TaskCategoryException;
+import ch.cern.todo.core.application.task.category.exception.TaskRecordsMappedException;
+import ch.cern.todo.core.application.task.category.query.dto.TaskCategoryFilters;
+import ch.cern.todo.core.application.task.category.query.dto.TaskCategoryProjection;
 import ch.cern.todo.core.domain.TaskCategory;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.TypedQuery;
+import jakarta.persistence.criteria.*;
 import org.hibernate.exception.ConstraintViolationException;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -16,8 +19,6 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.dao.DataAccessException;
 import org.springframework.dao.DataIntegrityViolationException;
-import org.springframework.data.domain.PageImpl;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 
 import java.util.List;
@@ -32,7 +33,10 @@ class TaskCategoryRepositoryTest {
 
     @Mock
     private TaskCategoryRepositoryJpa taskCategoryRepositoryJpa;
-
+    
+    @Mock
+    private EntityManager entityManager;
+    
     @InjectMocks
     private TaskCategoryRepository taskCategoryRepository;
 
@@ -231,26 +235,41 @@ class TaskCategoryRepositoryTest {
     }
 
     @Test
-    void givenTaskCategoryFilters_whenGetTaskCategories_thenReturnCustomPage() {
+    void givenTaskCategoryFiltersWithName_whenGetTaskCategories_thenReturnCustomPage() {
         //given
-        final TaskCategoryFilters taskCategoryFilters = TaskCategoryFilters.builder()
-                .pageNumber(0)
-                .pageSize(5)
-                .sortDirection(SortDirection.ASC)
-                .build();
-        final List<TaskCategoryEntity> taskCategoryEntities = List.of(
-                new TaskCategoryEntity(1L, "name1", "decription1"),
-                new TaskCategoryEntity(2L, "name2", "decription2")
+        final TaskCategoryFilters taskCategoryFilters = new TaskCategoryFilters(
+                "name",
+                0,
+                0,
+                SortDirection.ASC
         );
-        final PageRequest pageRequest = PageRequest.of(taskCategoryFilters.pageNumber(), taskCategoryFilters.pageSize(), getSorting(taskCategoryFilters.sortDirection()));
-        final CustomPage<TaskCategoryProjection> expected = new CustomPage<>(taskCategoryEntities.stream()
-                .map(entity -> new TaskCategoryProjection(entity.getId(), entity.getName(), entity.getDescription()))
-                .toList(),
-                2,1);
+        final CriteriaBuilder criteriaBuilder = mock(CriteriaBuilder.class);
+        final CriteriaQuery criteriaQuery = mock(CriteriaQuery.class);
+        final Root root = mock(Root.class);
+        final Path path = mock(Path.class);
+        final Predicate predicate = mock(Predicate.class);
+        final TypedQuery typedQuery = mock(TypedQuery.class);
+        final TaskCategoryEntity taskCategoryEntity = new TaskCategoryEntity(1L, "name", "description");
+        final TaskCategoryEntity taskCategoryEntity2 = new TaskCategoryEntity(2L, "secondName", "secondDescription");
+        final Long count = 2L;
+        final CustomPage<TaskCategoryProjection> expected = getTaskCategoryProjectionCustomPage(taskCategoryEntity, taskCategoryEntity2);
 
         //when
-        when(taskCategoryRepositoryJpa.findAll(pageRequest))
-                .thenReturn(new PageImpl<>(taskCategoryEntities, pageRequest, taskCategoryEntities.size()));
+        when(entityManager.getCriteriaBuilder()).thenReturn(criteriaBuilder);
+        when(criteriaBuilder.createQuery(TaskCategoryEntity.class)).thenReturn(criteriaQuery);
+        when(criteriaQuery.from(TaskCategoryEntity.class)).thenReturn(root);
+        when(root.get(anyString())).thenReturn(path);
+        when(entityManager.createQuery(criteriaQuery)).thenReturn(typedQuery);
+        when(typedQuery.setMaxResults(taskCategoryFilters.pageSize())).thenReturn(typedQuery);
+        when(typedQuery.setFirstResult(taskCategoryFilters.pageSize() * taskCategoryFilters.pageNumber())).thenReturn(typedQuery);
+        when(typedQuery.getResultList()).thenReturn(List.of(taskCategoryEntity, taskCategoryEntity2));
+        when(criteriaBuilder.createQuery(Long.class)).thenReturn(criteriaQuery);
+        when(criteriaBuilder.count(any())).thenReturn(root);
+        when(criteriaQuery.select(any(Expression.class))).thenReturn(criteriaQuery);
+        when(criteriaBuilder.and(any(Predicate[].class))).thenReturn(predicate);
+        when(criteriaQuery.where(any(Expression.class))).thenReturn(criteriaQuery);
+        when(typedQuery.getSingleResult()).thenReturn(count);
+
         final CustomPage<TaskCategoryProjection> result = taskCategoryRepository.getTaskCategories(taskCategoryFilters);
 
         //then
@@ -258,28 +277,42 @@ class TaskCategoryRepositoryTest {
     }
 
     @Test
-    void givenTaskCategoryFilters_whenGetTaskCategoriesByName_thenReturnCustomPage() {
+    void givenTaskCategoryFilters_whenGetTaskCategories_thenReturnCustomPage() {
         //given
-        final String name = "name1";
-        final TaskCategoryFilters taskCategoryFilters = TaskCategoryFilters.builder()
-                .pageNumber(0)
-                .pageSize(5)
-                .name(name)
-                .sortDirection(SortDirection.DESC)
-                .build();
-        final List<TaskCategoryEntity> taskCategoryEntities = List.of(
-                new TaskCategoryEntity(1L, name, "decription1")
+        final TaskCategoryFilters taskCategoryFilters = new TaskCategoryFilters(
+                null,
+                0,
+                0,
+                SortDirection.DESC
         );
-        final PageRequest pageRequest = PageRequest.of(taskCategoryFilters.pageNumber(), taskCategoryFilters.pageSize(), getSorting(taskCategoryFilters.sortDirection()));
-        final CustomPage<TaskCategoryProjection> expected = new CustomPage<>(taskCategoryEntities.stream()
-                .map(entity -> new TaskCategoryProjection(entity.getId(), entity.getName(), entity.getDescription()))
-                .toList(),
-                1,1);
+        final CriteriaBuilder criteriaBuilder = mock(CriteriaBuilder.class);
+        final CriteriaQuery criteriaQuery = mock(CriteriaQuery.class);
+        final Root root = mock(Root.class);
+        final Path path = mock(Path.class);
+        final Predicate predicate = mock(Predicate.class);
+        final TypedQuery typedQuery = mock(TypedQuery.class);
+        final TaskCategoryEntity taskCategoryEntity = new TaskCategoryEntity(1L, "name", "description");
+        final TaskCategoryEntity taskCategoryEntity2 = new TaskCategoryEntity(2L, "secondName", "secondDescription");
+        final Long count = 2L;
+        final CustomPage<TaskCategoryProjection> expected = getTaskCategoryProjectionCustomPage(taskCategoryEntity, taskCategoryEntity2);
 
         //when
-        when(taskCategoryRepositoryJpa.findAllByName(name, pageRequest))
-                .thenReturn(new PageImpl<>(taskCategoryEntities, pageRequest, taskCategoryEntities.size()));
-        final CustomPage<TaskCategoryProjection> result = taskCategoryRepository.getTaskCategoriesByName(taskCategoryFilters);
+        when(entityManager.getCriteriaBuilder()).thenReturn(criteriaBuilder);
+        when(criteriaBuilder.createQuery(TaskCategoryEntity.class)).thenReturn(criteriaQuery);
+        when(criteriaQuery.from(TaskCategoryEntity.class)).thenReturn(root);
+        when(root.get(anyString())).thenReturn(path);
+        when(entityManager.createQuery(criteriaQuery)).thenReturn(typedQuery);
+        when(typedQuery.setMaxResults(taskCategoryFilters.pageSize())).thenReturn(typedQuery);
+        when(typedQuery.setFirstResult(taskCategoryFilters.pageSize() * taskCategoryFilters.pageNumber())).thenReturn(typedQuery);
+        when(typedQuery.getResultList()).thenReturn(List.of(taskCategoryEntity, taskCategoryEntity2));
+        when(criteriaBuilder.createQuery(Long.class)).thenReturn(criteriaQuery);
+        when(criteriaBuilder.count(any())).thenReturn(root);
+        when(criteriaQuery.select(any(Expression.class))).thenReturn(criteriaQuery);
+        when(criteriaBuilder.and(any(Predicate[].class))).thenReturn(predicate);
+        when(criteriaQuery.where(any(Expression.class))).thenReturn(criteriaQuery);
+        when(typedQuery.getSingleResult()).thenReturn(count);
+
+        final CustomPage<TaskCategoryProjection> result = taskCategoryRepository.getTaskCategories(taskCategoryFilters);
 
         //then
         assertEquals(expected, result);
@@ -308,5 +341,11 @@ class TaskCategoryRepositoryTest {
         return sortDirection == SortDirection.ASC ?
                 Sort.by("id").ascending() :
                 Sort.by("id").descending();
+    }
+
+    private static CustomPage<TaskCategoryProjection> getTaskCategoryProjectionCustomPage(TaskCategoryEntity taskCategoryEntity, TaskCategoryEntity taskCategoryEntity2) {
+        final TaskCategoryProjection taskCategoryProjection = new TaskCategoryProjection(taskCategoryEntity.getId(), taskCategoryEntity.getName(), taskCategoryEntity.getDescription());
+        final TaskCategoryProjection taskCategoryProjection2 = new TaskCategoryProjection(taskCategoryEntity2.getId(), taskCategoryEntity2.getName(), taskCategoryEntity2.getDescription());
+        return new CustomPage<>(List.of(taskCategoryProjection, taskCategoryProjection2), 2, 0);
     }
 }

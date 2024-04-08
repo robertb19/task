@@ -2,8 +2,13 @@ package ch.cern.todo.adapter.jpa.task;
 
 import ch.cern.todo.adapter.jpa.task.category.TaskCategoryEntity;
 import ch.cern.todo.adapter.jpa.task.category.TaskCategoryRepositoryJpa;
-import ch.cern.todo.core.application.exception.TaskCategoryNotFoundException;
-import ch.cern.todo.core.application.query.dto.*;
+import ch.cern.todo.core.application.dto.CustomPage;
+import ch.cern.todo.core.application.dto.SortDirection;
+import ch.cern.todo.core.application.task.category.exception.TaskCategoryNotFoundException;
+import ch.cern.todo.core.application.task.category.query.dto.TaskCategoryProjection;
+import ch.cern.todo.core.application.task.query.dto.DeadlineMode;
+import ch.cern.todo.core.application.task.query.dto.TaskFilters;
+import ch.cern.todo.core.application.task.query.dto.TaskProjection;
 import ch.cern.todo.core.domain.Task;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.TypedQuery;

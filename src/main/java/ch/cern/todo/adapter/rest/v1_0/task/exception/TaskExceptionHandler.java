@@ -1,8 +1,8 @@
 package ch.cern.todo.adapter.rest.v1_0.task.exception;
 
 import ch.cern.todo.adapter.rest.v1_0.request.ErrorResponse;
-import ch.cern.todo.core.application.exception.TaskCategoryNotFoundException;
-import ch.cern.todo.core.application.exception.TaskNotFoundException;
+import ch.cern.todo.core.application.task.category.exception.TaskCategoryNotFoundException;
+import ch.cern.todo.core.application.task.exception.TaskNotFoundException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ControllerAdvice;
