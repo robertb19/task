@@ -46,7 +46,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.*;
-import static util.TestUtils.generateRandomCharacterString;
+import static ch.cern.todo.util.TestUtils.generateRandomCharacterString;
 
 @ExtendWith(SpringExtension.class)
 @WebMvcTest(TaskCategoryController.class)
