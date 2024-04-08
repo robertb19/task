@@ -1,7 +1,5 @@
 package ch.cern.todo.it.config;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
 import org.springframework.beans.factory.annotation.Value;
@@ -21,12 +19,11 @@ public class ITTestConfiguration {
     @Value("${spring.datasource.driver-class-name}")
     private String driver;
 
-    @Bean
-    public ObjectMapper objectMapper() {
-        ObjectMapper objectMapper = new ObjectMapper();
-        objectMapper.registerModule(new JavaTimeModule());
-        return objectMapper;
-    }
+    @Value("${spring.datasource.username}")
+    private String username;
+
+    @Value("${spring.datasource.password}")
+    private String password;
 
     @Bean
     public DataSource dataSource() {
@@ -34,6 +31,8 @@ public class ITTestConfiguration {
         config.setDriverClassName(driver);
         config.setJdbcUrl(url);
         config.setAutoCommit(true);
+        config.setUsername(username);
+        config.setPassword(password);
         return new HikariDataSource(config);
     }
 }

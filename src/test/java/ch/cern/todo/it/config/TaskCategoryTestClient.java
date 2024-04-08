@@ -8,12 +8,9 @@ import ch.cern.todo.adapter.rest.v1_0.task.category.response.GetTaskCategoryResp
 import org.springframework.boot.test.context.TestComponent;
 import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.boot.test.web.server.LocalServerPort;
-import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.*;
-import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
-import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriBuilder;
 import org.springframework.web.util.UriComponentsBuilder;
 
@@ -63,8 +60,6 @@ public class TaskCategoryTestClient {
 			uriBuilder = uriBuilder.queryParam("size", pageSize.get());
 		}
 
-		//todo check
-		//final ParameterizedTypeReference<CommonPage<GetTaskCategoryResponse>> parameterizedTypeReference = new ParameterizedTypeReference<>(){};
 		return restTemplate.exchange(uriBuilder.build(), HttpMethod.GET, new HttpEntity<>(new HttpHeaders()), new ParameterizedTypeReference<>(){});
 	}
 
