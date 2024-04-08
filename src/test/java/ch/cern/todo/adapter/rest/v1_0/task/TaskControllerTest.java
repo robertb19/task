@@ -34,7 +34,7 @@ import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.util.MultiValueMap;
 import org.springframework.util.MultiValueMapAdapter;
 import org.springframework.web.context.WebApplicationContext;
-import util.TestUtils;
+import ch.cern.todo.util.TestUtils;
 
 import java.time.Clock;
 import java.time.Instant;
@@ -48,7 +48,7 @@ import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.when;
-import static util.TestUtils.generateRandomCharacterString;
+import static ch.cern.todo.util.TestUtils.generateRandomCharacterString;
 
 @ExtendWith(SpringExtension.class)
 @WebMvcTest(TaskController.class)

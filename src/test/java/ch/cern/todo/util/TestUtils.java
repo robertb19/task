@@ -1,4 +1,4 @@
-package util;
+package ch.cern.todo.util;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
