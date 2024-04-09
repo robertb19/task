@@ -109,7 +109,7 @@ public class TaskRepository implements TaskWriteStore, TaskReadStore {
         final CriteriaQuery<TaskEntity> criteriaQuery = criteriaBuilder.createQuery(TaskEntity.class);
 
         final Root<TaskEntity> root = criteriaQuery.from(TaskEntity.class);
-
+        root.fetch("category", JoinType.INNER);
         final Set<Predicate> pagePredicates = getTaskPredicates(taskFilters, root, criteriaBuilder);
         criteriaQuery.where(criteriaBuilder.and(pagePredicates.toArray(new Predicate[pagePredicates.size()])));
         criteriaQuery.orderBy(getSortingById(criteriaBuilder, root, taskFilters.sortDirection()));
