@@ -1,0 +1,19 @@
+<mat-toolbar class="topbar relative mat-toolbar mat-primary mat-toolbar-single-row" color="primary" style="width:100%; ">
+  <mat-toolbar-row width="100%" class="mx-auto">
+    <div class="flex-box d-flex flex-row" style="width:100%; display: flex">
+      <div class="menu-element">Task Categories</div>
+      <div class="menu-element">Tasks</div>
+    </div>
+  </mat-toolbar-row>
+</mat-toolbar>
+<div class="main-body">
+  <mat-sidenav-container>
+    <div>
+      <app-add-task-category></app-add-task-category>
+    </div>
+    <div>
+      <app-view-task-categories></app-view-task-categories>
+    </div>
+    <router-outlet></router-outlet>
+  </mat-sidenav-container>
+</div>
