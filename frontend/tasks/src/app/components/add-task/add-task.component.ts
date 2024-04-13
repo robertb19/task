@@ -1,5 +1,5 @@
 import { Component } from '@angular/core';
-import {FormsModule} from "@angular/forms";
+import {FormControl, FormsModule, Validators} from "@angular/forms";
 import {MatButton} from "@angular/material/button";
 import {MatDialogActions, MatDialogClose} from "@angular/material/dialog";
 import {AddTaskForm, AddTaskViewForm} from "../../domain/task";
@@ -9,10 +9,11 @@ import {DialogRef} from "@angular/cdk/dialog";
 import {TaskService} from "../../service/task.service";
 import {AddTaskCategoryComponent} from "../add-task-category/add-task-category.component";
 import {DateFilterFn, MatDatepicker, MatDatepickerInput, MatDatepickerToggle} from "@angular/material/datepicker";
-import {MatLabel} from "@angular/material/form-field";
+import {MatError, MatHint, MatLabel} from "@angular/material/form-field";
 import {TaskCategoriesService} from "../../service/task-categories.service";
 import {MatNativeDateModule} from "@angular/material/core";
 import {MatInput} from "@angular/material/input";
+import {NgIf} from "@angular/common";
 
 @Component({
   selector: 'app-add-task',
@@ -27,12 +28,17 @@ import {MatInput} from "@angular/material/input";
     MatLabel,
     MatDatepickerInput,
     MatNativeDateModule,
-    MatInput
+    MatInput,
+    MatError,
+    MatHint,
+    NgIf
   ],
   templateUrl: './add-task.component.html',
   styleUrl: './add-task.component.css'
 })
 export class AddTaskComponent {
+  resetPasswordForm = new FormControl(new Date(), Validators.compose([ Validators.required, Validators.pattern(/^\d{1,2}\.\d{1,2}\.\d{4}$/) ]))
+
   dateFilter(date: Date | null): boolean  {
     const today = new Date()
     if(date == null) return false
@@ -60,20 +66,19 @@ export class AddTaskComponent {
             if (data != null) {
               var resultData = data;
               if (resultData != null) {
-                console.log("HELOLLO")
-                this.toastr.success(resultData.message);
+                this.toastr.success("Successfully added task",'',  {timeOut: 5000});
                 this.dialog.close()
-                window.location.reload();
                 setTimeout(() => {
-                  this.router.navigate(['/tasks']);
-                }, 500);
+                  this.dialog.close()
+                  window.location.reload();
+                }, 1800);
               }
             }
           },
           async error => {
-            this.toastr.error(error.message);
             setTimeout(() => {
-              this.router.navigate(['/tasks']);
+              this.toastr.error(error.message, '',  {timeOut: 3000})
+              this.dialog.close()
             }, 500);
           });
       },

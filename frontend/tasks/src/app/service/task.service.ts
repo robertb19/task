@@ -30,7 +30,13 @@ export class TaskService {
       httpOptions)
       .pipe(
         map((response: any) => response),
-        catchError(() => throwError(() => new Error(`Unable to add task`)))
+        catchError(error => {
+          if(error.error) {
+            throw new Error(error.error.message)
+          } else {
+            throw new Error(`Unable to add task`)
+          }
+        })
       );
   }
 

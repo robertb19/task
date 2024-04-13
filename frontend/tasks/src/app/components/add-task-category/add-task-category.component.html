@@ -19,8 +19,7 @@
         <input type="text" class="form-control" id="description"
                [(ngModel)]="addTaskCategory.description" name="description"
                #description="ngModel"
-               maxlength="100"
-               minlength="1">
+               maxlength="150">
         <mat-hint align="start" style="font-size: 10px">Not more then 150 characters long</mat-hint>
       </div>
       <div mat-dialog-actions class="action">
