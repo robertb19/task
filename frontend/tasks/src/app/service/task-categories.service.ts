@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import {Injectable} from '@angular/core';
 import {HttpHeaders, HttpClient, HttpParams} from '@angular/common/http';
 import {catchError, map, Observable, of, throwError} from "rxjs";
 import {globalProperties} from "../../properties";
@@ -15,7 +15,8 @@ var paths = {
 })
 export class TaskCategoriesService {
 
-  constructor(private httpClient: HttpClient) { }
+  constructor(private httpClient: HttpClient) {
+  }
 
   addTaskCategory(taskCategory: AddTaskCategoryForm): Observable<any> {
     const httpOptions = {
@@ -30,19 +31,26 @@ export class TaskCategoriesService {
       httpOptions)
       .pipe(
         map((response: any) => response),
-        catchError(() => throwError(() => new Error(`Unable to add task category`)))
-      );
+        catchError(error => {
+          console.log(error.status + " this is the error status")
+            if (error.status == 409) {
+              throw new Error(`Task category with this name already exists`)
+            } else {
+              throw new Error(`Unable to add task category`)
+            }
+          }
+        ));
   }
 
   get(pageSize: number, pageNumber: number, sortDirection: string, name?: string): Observable<Page> {
     let params = new HttpParams();
-    params= params.set('size', pageSize.toString())
+    params = params.set('size', pageSize.toString())
     params = params.set('page', pageNumber.toString())
-    params= params.set('sort', sortDirection)
+    params = params.set('sort', sortDirection)
 
     console.log(name + "and here ")
-    if(name != null && name != '') {
-      params = params.set('name',  name as string)
+    if (name != null && name != '') {
+      params = params.set('name', name as string)
     }
 
     console.log("therse are the params " + params)
@@ -52,11 +60,11 @@ export class TaskCategoriesService {
       })
       .pipe(
         map(res => res),
-        catchError(this.handleError<Page>('get',undefined))
+        catchError(this.handleError<Page>('get', undefined))
       );
   }
 
-  delete(id: number) : Observable<any> {
+  delete(id: number): Observable<any> {
     return this.httpClient.delete(paths.categoryWithIdUrl + id)
       .pipe(
         map((response: any) => response),
@@ -64,7 +72,7 @@ export class TaskCategoriesService {
       );
   }
 
-  update(taskCategory: EditTaskCategoryForm, id : number): Observable<any> {
+  update(taskCategory: EditTaskCategoryForm, id: number): Observable<any> {
     const httpOptions = {
       headers: new HttpHeaders({
         'Content-Type': 'application/json'
@@ -83,7 +91,7 @@ export class TaskCategoriesService {
 
   private handleError<T>(operation = 'operation', result?: T) {
     return (error: any): Observable<T> => {
-      console.error(error);
+      console.log(error +" heeeer eis the next error");
       return of(result as T);
     };
   }

@@ -4,23 +4,15 @@
       <div class="form-group">
         <label for="name">Name</label>
         <input type="text" class="form-control" id="name"
+               required
+               maxlength="100"
                [(ngModel)]="addTaskCategory.name" name="name"
-               #name="ngModel"
-        required
-        maxlength="100"
-        minlength="1">
+               #nameWrapper="ngModel">
+        <mat-error style="font-size: 10px" *ngIf="nameWrapper.errors">Name is required</mat-error>
         <mat-hint align="start" style="font-size: 10px">Not more then 100 characters long</mat-hint>
-        <mat-error *ngIf="name.errors?.['required']">Password must be a combination of lower-case, upper-case, numbers and at least 9 characters long</mat-error>
-        <div
-          *ngIf="name.pristine"
-          class="alert"
-        >
-        <div *ngIf="name.errors?.['required']">Name is required.</div>
-        <div *ngIf="name.errors?.['minlength']">
-          Name must be at least 1 character long
-        </div>
-        </div>
       </div>
+
+
 
       <div class="form-group">
         <label for="name">Description</label>
@@ -33,7 +25,7 @@
       </div>
       <div mat-dialog-actions class="action">
         <button mat-raised-button color="primary" type="button" class="btn btn-cancel" mat-dialog-close="false">Cancel</button>
-        <button mat-raised-button color="primary" type="submit" class="btn btn-success" (click)="AddTaskCategory()">Submit</button>
+        <button mat-raised-button color="primary" type="submit" class="btn btn-success" (click)="AddTaskCategory()" [disabled]="!nameWrapper.valid">Submit</button>
       </div>
     </form>
   </div>

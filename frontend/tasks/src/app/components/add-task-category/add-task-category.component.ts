@@ -1,13 +1,14 @@
-import {Component} from '@angular/core';
+import {Component, OnInit, ViewChild} from '@angular/core';
 import {Router} from "@angular/router";
 import {TaskCategoriesService} from "../../service/task-categories.service";
-import {ToastrService} from 'ngx-toastr';
+import {ToastContainerDirective, ToastrService} from 'ngx-toastr';
 import {FormsModule} from "@angular/forms";
 import {MatButton} from "@angular/material/button";
 import {MatDialogActions, MatDialogClose} from "@angular/material/dialog";
 import {DialogRef} from "@angular/cdk/dialog";
 import {AddTaskCategoryForm} from "../../domain/task-category";
 import {MatError, MatHint} from "@angular/material/form-field";
+import {NgIf} from "@angular/common";
 
 @Component({
   selector: 'app-add-task-category',
@@ -18,17 +19,24 @@ import {MatError, MatHint} from "@angular/material/form-field";
     MatDialogActions,
     MatDialogClose,
     MatError,
-    MatHint
+    MatHint,
+    NgIf
   ],
   templateUrl: './add-task-category.component.html',
   styleUrl: './add-task-category.component.css'
 })
-export class AddTaskCategoryComponent {
+export class AddTaskCategoryComponent implements OnInit{
   addTaskCategory: AddTaskCategoryForm = new AddTaskCategoryForm("", "");
 
   isSubmitted: boolean = false;
 
-  constructor(private router: Router, private taskCategoryService: TaskCategoriesService, private toastr: ToastrService, private dialog: DialogRef) {}
+  @ViewChild(ToastContainerDirective, {static: true}) toastContainer: ToastContainerDirective;
+
+  constructor(private router: Router, private taskCategoryService: TaskCategoriesService, private toastr: ToastrService,  private dialog: DialogRef) {}
+
+  ngOnInit() {
+    this.toastr.overlayContainer = this.toastContainer;
+  }
 
   AddTaskCategory() {
     this.isSubmitted = true;
@@ -36,20 +44,20 @@ export class AddTaskCategoryComponent {
         if (data != null) {
           var resultData = data;
           if (resultData != null) {
-            console.log("HELOLLO")
-            this.toastr.success(resultData.message);
+            this.toastr.success("Successfully added task category",'',  {timeOut: 5000});
             this.dialog.close()
-            window.location.reload();
             setTimeout(() => {
-              this.router.navigate(['/categories']);
-            }, 500);
+              this.dialog.close()
+              window.location.reload();
+            }, 1800);
           }
         }
       },
       async error => {
-        this.toastr.error(error.message);
         setTimeout(() => {
-          this.router.navigate(['/categories']);
+          console.log("and here is our error " + error)
+          this.toastr.error(error.message, '',  {timeOut: 3000})
+          this.dialog.close()
         }, 500);
       });
   }
