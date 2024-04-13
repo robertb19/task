@@ -1,23 +1,23 @@
 import { Injectable } from '@angular/core';
-import {HttpHeaders, HttpClient, HttpParams} from '@angular/common/http';
+import {HttpClient, HttpHeaders, HttpParams} from "@angular/common/http";
 import {catchError, map, Observable, of, throwError} from "rxjs";
 import {globalProperties} from "../../properties";
-import {AddTaskCategoryForm, EditTaskCategoryForm} from "../domain/task-category";
+import {AddTaskForm} from "../domain/task";
 import {Page} from "../domain/generic";
+import {EditTaskCategoryForm} from "../domain/task-category";
 
 var paths = {
-  baseCategoryUrl: globalProperties.baseUrl + "/v1.0/categories",
-  categoryWithIdUrl: globalProperties.baseUrl + "/v1.0/categories/",
+  baseTaskUrl: globalProperties.baseUrl + "/v1.0/tasks",
+  baseTaskWithUrl: globalProperties.baseUrl + "/v1.0/tasks/",
 }
 
 @Injectable({
   providedIn: 'root'
 })
-export class TaskCategoriesService {
-
+export class TaskService {
   constructor(private httpClient: HttpClient) { }
 
-  addTaskCategory(taskCategory: AddTaskCategoryForm): Observable<any> {
+  addTask(task: AddTaskForm): Observable<any> {
     const httpOptions = {
       headers: new HttpHeaders({
         'Content-Type': 'application/json'
@@ -25,29 +25,49 @@ export class TaskCategoriesService {
       observe: "response" as 'body'
     };
     return this.httpClient.post(
-      paths.baseCategoryUrl,
-      taskCategory,
+      paths.baseTaskUrl,
+      task,
       httpOptions)
       .pipe(
         map((response: any) => response),
-        catchError(() => throwError(() => new Error(`Unable to add task category`)))
+        catchError(() => throwError(() => new Error(`Unable to add task`)))
       );
   }
 
-  get(pageSize: number, pageNumber: number, sortDirection: string, name?: string): Observable<Page> {
+  get(pageSize: number,
+      pageNumber: number,
+      sortDirection: string,
+      deadlineMode : string,
+      name?: string,
+      categoryId? : number,
+      deadline? : Date): Observable<Page> {
     let params = new HttpParams();
     params= params.set('size', pageSize.toString())
     params = params.set('page', pageNumber.toString())
     params= params.set('sort', sortDirection)
 
-    console.log(name + "and here ")
+    if(deadlineMode == 'BEFORE') {
+      params = params.set('deadlineMode', 'BEFORE')
+    } else {
+      params = params.set('deadlineMode', 'AFTER')
+    }
+
     if(name != null && name != '') {
       params = params.set('name',  name as string)
     }
 
-    console.log("therse are the params " + params)
+    if(categoryId != null && categoryId != 0) {
+      params = params.set('category', categoryId as number)
+    }
+
+    if(deadline != null) {
+      params = params.set('deadlineDate', deadline.getTime() / 1000) //as Epoch Seconds
+    }
+
+    console.log(params + " these are my params")
+
     return this.httpClient.get<Page>(
-      paths.baseCategoryUrl, {
+      paths.baseTaskUrl, {
         params: params
       })
       .pipe(
@@ -57,10 +77,10 @@ export class TaskCategoriesService {
   }
 
   delete(id: number) : Observable<any> {
-    return this.httpClient.delete(paths.categoryWithIdUrl + id)
+    return this.httpClient.delete(paths.baseTaskWithUrl + id)
       .pipe(
         map((response: any) => response),
-        catchError(() => throwError(() => new Error(`Unable to delete task category`)))
+        catchError(() => throwError(() => new Error(`Unable to delete task`)))
       );
   }
 
@@ -72,12 +92,12 @@ export class TaskCategoriesService {
       observe: "response" as 'body'
     };
     return this.httpClient.patch(
-      paths.categoryWithIdUrl + id,
+      paths.baseTaskWithUrl + id,
       taskCategory,
       httpOptions)
       .pipe(
         map((response: any) => response),
-        catchError(() => throwError(() => new Error(`Unable to edit task category`)))
+        catchError(() => throwError(() => new Error(`Unable to edit task`)))
       );
   }
 
@@ -87,5 +107,4 @@ export class TaskCategoriesService {
       return of(result as T);
     };
   }
-
 }

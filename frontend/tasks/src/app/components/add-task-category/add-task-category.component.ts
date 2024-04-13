@@ -1,14 +1,21 @@
-import {Component, OnInit, ViewChild} from '@angular/core';
+import {Component} from '@angular/core';
 import {Router} from "@angular/router";
 import {TaskCategoriesService} from "../../service/task-categories.service";
 import {ToastrService} from 'ngx-toastr';
 import {FormsModule} from "@angular/forms";
+import {MatButton} from "@angular/material/button";
+import {MatDialogActions, MatDialogClose} from "@angular/material/dialog";
+import {DialogRef} from "@angular/cdk/dialog";
+import {AddTaskCategoryForm} from "../../domain/task-category";
 
 @Component({
   selector: 'app-add-task-category',
   standalone: true,
   imports: [
-    FormsModule
+    FormsModule,
+    MatButton,
+    MatDialogActions,
+    MatDialogClose
   ],
   templateUrl: './add-task-category.component.html',
   styleUrl: './add-task-category.component.css'
@@ -18,18 +25,20 @@ export class AddTaskCategoryComponent {
 
   isSubmitted: boolean = false;
 
-  constructor(private router: Router, private taskCategoryService: TaskCategoriesService, private toastr: ToastrService) {
-  }
+  constructor(private router: Router, private taskCategoryService: TaskCategoriesService, private toastr: ToastrService, private dialog: DialogRef) {}
 
   AddTaskCategory() {
     this.isSubmitted = true;
     this.taskCategoryService.addTaskCategory(this.addTaskCategory).subscribe(async data => {
-        if (data != null && data.body != null) {
-          var resultData = data.body;
-          if (resultData != null && resultData.isSuccess) {
+        if (data != null) {
+          var resultData = data;
+          if (resultData != null) {
+            console.log("HELOLLO")
             this.toastr.success(resultData.message);
+            this.dialog.close()
+            window.location.reload();
             setTimeout(() => {
-              this.router.navigate(['/addTaskCategory']);
+              this.router.navigate(['/categories']);
             }, 500);
           }
         }
@@ -37,18 +46,13 @@ export class AddTaskCategoryComponent {
       async error => {
         this.toastr.error(error.message);
         setTimeout(() => {
-          this.router.navigate(['/addTaskCategory']);
+          this.router.navigate(['/categories']);
         }, 500);
       });
   }
 
-  onSubmit() { this.isSubmitted = true; }
-}
-
-export class AddTaskCategoryForm {
-  constructor(
-    public name: string,
-    public description: string
-  ) {
+  onSubmit() {
+    console.log("I submitted")
+    this.isSubmitted = true;
   }
 }

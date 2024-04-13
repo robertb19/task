@@ -24,7 +24,9 @@
 </table>
 -->
 <div class="categories">
-  <h2>My Categories</h2>
+  <div class="task-categories-header-container">
+    <h1 class="task-categories-header">Task Categories</h1>
+  </div>
 <!--  <form [formGroup]="form" class="normal-form" (ngSubmit)="onSubmit()">
   <mat-form-field>
       <input matInput placeholder="Search name" [(ngModel)]="name" #nameInput>
@@ -34,16 +36,17 @@
   </mat-form-field>
   </form>-->
 
-  <form (ngSubmit)="onSubmit()" #taskCategoryForm="ngForm">
-    <div class="form-group">
-      <mat-label for="name">Name</mat-label>
-      <input type="text" class="form-control" id="name"
+  <form class="d-flex justify-content-between my-2" (ngSubmit)="onSubmit()" #taskCategoryForm="ngForm">
+    <div class="d-flex flex-row" style="align-items: center">
+      <mat-label>Name</mat-label>
+      <input type="text" class="form-control" id="name" style="margin-left: 10px; margin-right: 1%; max-width: 100%"
              required
              [(ngModel)]="categoryName" name="name"
              #name="ngModel">
     </div>
-    <div>
-      <button type="submit" class="btn btn-success" (click)="loadTaskCategoriesPage()">Submit</button>
+    <div class="button-holder">
+      <button class="submit-button" mat-raised-button color="primary" (click)="loadTaskCategoriesPage()">Submit Filters</button>
+      <button class="submit-button" mat-raised-button color="primary" (click)="openAddCategoryForm()" >Add Task Category</button>
     </div>
   </form>
 
@@ -56,28 +59,48 @@
 -->
 
 
-  <div class="spinner-container" *ngIf="dataSource.loading$ | async">
-    <mat-spinner></mat-spinner>
-  </div>
-  <div>
-  <mat-table class="categories-table mat-elevation-z8" [dataSource]="dataSource" matSort matSortActive="id" matSortDirection="desc" matSortDisableClear>
+  <div class="my-4">
+    <div class="spinner-container" *ngIf="dataSource.loading$ | async">
+      <mat-spinner></mat-spinner>
+    </div>
+  <mat-table class="categories-table mat-elevation-z0" [dataSource]="dataSource" matSort matSortActive="id" matSortDirection="desc" matSortDisableClear>
 
     <ng-container matColumnDef="id">
-      <div *matHeaderCellDef mat-sort-header>ID</div>
-      <div *matCellDef="let category">{{ category.id }}</div>
+      <mat-header-cell mat-sort-header *matHeaderCellDef>ID</mat-header-cell>
+      <mat-cell class="name-cell"
+                *matCellDef="let category">
+        {{ category.id }}
+      </mat-cell>
     </ng-container>
 
     <ng-container matColumnDef="name">
       <mat-header-cell *matHeaderCellDef>Name</mat-header-cell>
       <mat-cell class="name-cell"
-                *matCellDef="let category">{{ category.name }}
+                *matCellDef="let category">
+        {{ category.name }}
       </mat-cell>
     </ng-container>
 
     <ng-container matColumnDef="description">
       <mat-header-cell *matHeaderCellDef>Description</mat-header-cell>
       <mat-cell class="description-cell"
-                *matCellDef="let category">{{ category.description }}
+                *matCellDef="let category">
+        {{ category.description }}
+      </mat-cell>
+    </ng-container>
+
+    <ng-container matColumnDef="action">
+      <mat-header-cell *matHeaderCellDef>Action</mat-header-cell>
+      <mat-cell class="action-cell" *matCellDef="let category">
+        <button mat-icon-button title="View">
+          <mat-icon>view_comfy</mat-icon>
+        </button>
+        <button mat-icon-button title="Edit" type="submit" (click)="openEditCategoryForm(category)">
+          <mat-icon>edit</mat-icon>
+        </button>
+        <button mat-icon-button color="warn" title="Delete" (click)="deleteTaskCategory(category.id)">
+          <mat-icon>delete</mat-icon>
+        </button>
       </mat-cell>
     </ng-container>
 
@@ -88,6 +111,6 @@
   </mat-table>
 
   <mat-paginator [length]="dataSource.totalElements" [pageSize]="5"
-                 [pageSizeOptions]="[5, 10, 20]" [showFirstLastButtons]="true"></mat-paginator>
+                 [pageSizeOptions]="[5, 10]" [showFirstLastButtons]="true"></mat-paginator>
   </div>
 </div>

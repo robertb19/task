@@ -1,13 +1,8 @@
-export class TaskCategory {
-  constructor(
-    public id: number,
-    public name: string,
-    public description: string
-  ) {}
+export interface GenericAddResponse {
+  id: number;
 }
 
 export class Page {
-
   constructor(
     public pageNumber: number,
     public pageSize: number,

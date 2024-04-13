@@ -6,8 +6,23 @@ import { provideAnimationsAsync } from '@angular/platform-browser/animations/asy
 import {BrowserAnimationsModule} from "@angular/platform-browser/animations";
 import {importProvidersFrom} from "@angular/core";
 import {MatToolbarModule} from "@angular/material/toolbar";
+import {provideRouter, Routes} from "@angular/router";
+import {ViewTaskCategoriesComponent} from "./app/components/view-task-categories/view-task-categories.component";
+import {AddTaskCategoryComponent} from "./app/components/add-task-category/add-task-category.component";
+import {ViewTasksComponent} from "./app/components/view-tasks/view-tasks.component";
+import {registerLocaleData} from "@angular/common";
+import {enGbLocale} from "ngx-bootstrap/chronos";
+import {provideNativeDateAdapter} from "@angular/material/core";
+
+const routes: Routes = [
+  { path: '', component: ViewTaskCategoriesComponent },
+  { path: 'categories', component: ViewTaskCategoriesComponent },
+  { path: 'tasks', component: ViewTasksComponent }
+];
+
+registerLocaleData(enGbLocale, 'en-GB')
 
 bootstrapApplication(AppComponent, {
-  providers: [provideHttpClient(), provideToastr(), provideAnimationsAsync(),
+  providers: [provideHttpClient(), provideToastr(), provideAnimationsAsync(), provideRouter(routes), provideNativeDateAdapter(),
     importProvidersFrom([BrowserAnimationsModule, MatToolbarModule])]
 }).catch((err) => console.error(err));

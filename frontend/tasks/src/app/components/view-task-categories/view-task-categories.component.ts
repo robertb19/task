@@ -10,18 +10,14 @@ import {
 import {CommonModule, NgFor} from "@angular/common";
 import {TaskCategoriesService} from "../../service/task-categories.service";
 import {MatPaginator, MatPaginatorModule, PageEvent} from "@angular/material/paginator";
-import {Page, TaskCategory} from "../../interface/task-category";
+import {TaskCategory} from "../../domain/task-category";
 import {MatSort, MatSortModule, Sort} from '@angular/material/sort';
 import {
   MatCell,
   MatColumnDef,
   MatHeaderCell,
-  MatTable,
-  MatTableDataSource,
   MatTableModule
 } from '@angular/material/table';
-import {BrowserModule} from "@angular/platform-browser";
-import {BrowserAnimationsModule} from "@angular/platform-browser/animations";
 import {HttpClientModule} from "@angular/common/http";
 import {MatInputModule} from "@angular/material/input";
 import {MatProgressSpinnerModule} from "@angular/material/progress-spinner";
@@ -29,6 +25,13 @@ import {TaskCategoriesDataSource} from "./categories-data-source";
 import {catchError, debounceTime, distinctUntilChanged, finalize, fromEvent, map, merge, of, tap} from "rxjs";
 import {ActivatedRoute, RouterModule} from "@angular/router";
 import {FormsModule} from "@angular/forms";
+import {MatButton, MatIconButton} from "@angular/material/button";
+import {MatDialog, MatDialogModule} from "@angular/material/dialog";
+import {AddTaskCategoryComponent} from "../add-task-category/add-task-category.component";
+import {MatIcon} from "@angular/material/icon";
+import {ToastrService} from "ngx-toastr";
+import {EditTaskCategoryComponent} from "../edit-task-category/edit-task-category.component";
+import {Page} from "../../domain/generic";
 
 @Component({
   selector: 'app-view-task-categories',
@@ -46,13 +49,16 @@ import {FormsModule} from "@angular/forms";
     MatSortModule,
     MatProgressSpinnerModule,
     RouterModule,
-    FormsModule
+    FormsModule,
+    MatButton,
+    MatIconButton,
+    MatIcon
   ],
   templateUrl: './view-task-categories.component.html',
   styleUrl: './view-task-categories.component.css'
 })
 export class ViewTaskCategoriesComponent implements AfterViewInit, OnInit {
-  displayedColumns = ["id", "name", "description"];
+  displayedColumns = ["id", "name", "description", "action"];
   dataSource : TaskCategoriesDataSource
   totalElements : number = 0
   defaultPage : number = 0
@@ -65,7 +71,7 @@ export class ViewTaskCategoriesComponent implements AfterViewInit, OnInit {
   @ViewChild(MatSort) sort: MatSort;
   @ViewChild('nameInput') input: ElementRef;
 
-  constructor(private taskCategoryService : TaskCategoriesService, private changeDetector: ChangeDetectorRef) {}
+  constructor(private taskCategoryService : TaskCategoriesService, private changeDetector: ChangeDetectorRef, private dialog : MatDialog, private toastr: ToastrService) {}
 
   ngOnInit(): void {
     this.dataSource = new TaskCategoriesDataSource(this.taskCategoryService);
@@ -104,4 +110,22 @@ export class ViewTaskCategoriesComponent implements AfterViewInit, OnInit {
       );
   }
 
+  openAddCategoryForm() {
+    console.log("I work")
+    this.dialog.open(AddTaskCategoryComponent)
+  }
+
+  openEditCategoryForm(data : TaskCategory) {
+    this.dialog.open(EditTaskCategoryComponent, {data: data})
+  }
+
+  deleteTaskCategory(id : number) {
+    this.taskCategoryService.delete(id).subscribe({
+      next: () => {
+        alert("Task Category Deleted")
+        window.location.reload();
+        //todo change into toaster later
+      }
+    })
+  }
 }
