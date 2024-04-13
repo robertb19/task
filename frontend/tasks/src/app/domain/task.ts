@@ -18,6 +18,15 @@ export class AddTaskForm {
   ) {}
 }
 
+export class EditTaskForm {
+  constructor(
+    public name: string,
+    public description: string,
+    public deadline: number, //epoch second
+    public categoryId: number
+  ) {}
+}
+
 export class Task {
   constructor(
     public id: number,

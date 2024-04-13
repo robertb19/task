@@ -37,8 +37,6 @@ import {NgIf} from "@angular/common";
   styleUrl: './add-task.component.css'
 })
 export class AddTaskComponent {
-  resetPasswordForm = new FormControl(new Date(), Validators.compose([ Validators.required, Validators.pattern(/^\d{1,2}\.\d{1,2}\.\d{4}$/) ]))
-
   dateFilter(date: Date | null): boolean  {
     const today = new Date()
     if(date == null) return false
@@ -89,6 +87,4 @@ export class AddTaskComponent {
     console.log("I submitted")
     this.isSubmitted = true;
   }
-
-  protected readonly AddTaskCategoryComponent = AddTaskCategoryComponent;
 }

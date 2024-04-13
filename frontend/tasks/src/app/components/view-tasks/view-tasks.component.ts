@@ -41,7 +41,8 @@ import {MatOption} from "@angular/material/autocomplete";
 import {MatSelect} from "@angular/material/select";
 import {EditTaskCategoryComponent} from "../edit-task-category/edit-task-category.component";
 import {AddTaskComponent} from "../add-task/add-task.component";
-import {Task} from "../../domain/task";
+import {EditTaskForm, Task} from "../../domain/task";
+import {EditTaskComponent} from "../edit-task/edit-task.component";
 
 @Component({
   selector: 'app-view-tasks',
@@ -176,4 +177,11 @@ export class ViewTasksComponent implements AfterViewInit, OnInit {
     this.dialog.open(AddTaskComponent)
   }
 
+  openEditTaskForm(data : Task) {
+    this.dialog.open(EditTaskComponent, {data: data})
+  }
+
+/*  reset() {
+    thloadTasksPage()
+  }*/
 }
