@@ -3,12 +3,22 @@
     <form (ngSubmit)="onSubmit()" #taskCategoryForm="ngForm">
       <div class="form-group">
         <label for="name">Name</label>
-        <input type="text" class="form-control" id="name" required
+        <input type="text" class="form-control" id="name"
                [(ngModel)]="addTaskCategory.name" name="name"
-               #name="ngModel">
-        <div [hidden]="name.valid || name.pristine"
-             class="alert alert-danger">
-          Name is required
+               #name="ngModel"
+        required
+        maxlength="100"
+        minlength="1">
+        <mat-hint align="start" style="font-size: 10px">Not more then 100 characters long</mat-hint>
+        <mat-error *ngIf="name.errors?.['required']">Password must be a combination of lower-case, upper-case, numbers and at least 9 characters long</mat-error>
+        <div
+          *ngIf="name.pristine"
+          class="alert"
+        >
+        <div *ngIf="name.errors?.['required']">Name is required.</div>
+        <div *ngIf="name.errors?.['minlength']">
+          Name must be at least 1 character long
+        </div>
         </div>
       </div>
 
@@ -16,7 +26,10 @@
         <label for="name">Description</label>
         <input type="text" class="form-control" id="description"
                [(ngModel)]="addTaskCategory.description" name="description"
-               #name="ngModel">
+               #description="ngModel"
+               maxlength="100"
+               minlength="1">
+        <mat-hint align="start" style="font-size: 10px">Not more then 150 characters long</mat-hint>
       </div>
       <div mat-dialog-actions class="action">
         <button mat-raised-button color="primary" type="button" class="btn btn-cancel" mat-dialog-close="false">Cancel</button>

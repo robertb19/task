@@ -15,24 +15,24 @@
   padding: 8px 8px 8px 0;
 }
 
-.categories {
+.tasks {
   display: block;
   width: auto;
   height: auto;
 }
 
-.task-categories-header {
+.task-header {
   font-size : 24px;
 }
 
-.task-categories-header-container {
+.task-header-container {
   text-align: center
 }
 
 .button-holder {
-  display:flex;
-  flex-direction: row;
-  align-items: center;
+  overflow:hidden;
+  width:auto;
+  display:inline;
 }
 
 .submit-button {
@@ -42,7 +42,7 @@
 
 .mat-form-field
 {
-  width: 250px;
+  width: 300px;
   padding-right: 5px;
   margin-bottom: -1.25em;
 }

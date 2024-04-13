@@ -7,6 +7,7 @@ import {MatButton} from "@angular/material/button";
 import {MatDialogActions, MatDialogClose} from "@angular/material/dialog";
 import {DialogRef} from "@angular/cdk/dialog";
 import {AddTaskCategoryForm} from "../../domain/task-category";
+import {MatError, MatHint} from "@angular/material/form-field";
 
 @Component({
   selector: 'app-add-task-category',
@@ -15,7 +16,9 @@ import {AddTaskCategoryForm} from "../../domain/task-category";
     FormsModule,
     MatButton,
     MatDialogActions,
-    MatDialogClose
+    MatDialogClose,
+    MatError,
+    MatHint
   ],
   templateUrl: './add-task-category.component.html',
   styleUrl: './add-task-category.component.css'

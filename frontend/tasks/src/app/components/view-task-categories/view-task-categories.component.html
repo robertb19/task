@@ -37,13 +37,12 @@
   </form>-->
 
   <form class="d-flex justify-content-between my-2" (ngSubmit)="onSubmit()" #taskCategoryForm="ngForm">
-    <div class="d-flex flex-row" style="align-items: center">
-      <mat-label>Name</mat-label>
-      <input type="text" class="form-control" id="name" style="margin-left: 10px; margin-right: 1%; max-width: 100%"
-             required
-             [(ngModel)]="categoryName" name="name"
-             #name="ngModel">
-    </div>
+      <mat-form-field class="mat-form-field">
+        <mat-label>Name</mat-label>
+        <input matInput type="text" id="name"
+               [(ngModel)]="categoryName" name="name"
+               #name="ngModel">
+      </mat-form-field>
     <div class="button-holder">
       <button class="submit-button" mat-raised-button color="primary" (click)="loadTaskCategoriesPage()">Submit Filters</button>
       <button class="submit-button" mat-raised-button color="primary" (click)="openAddCategoryForm()" >Add Task Category</button>
@@ -92,9 +91,6 @@
     <ng-container matColumnDef="action">
       <mat-header-cell *matHeaderCellDef>Action</mat-header-cell>
       <mat-cell class="action-cell" *matCellDef="let category">
-        <button mat-icon-button title="View">
-          <mat-icon>view_comfy</mat-icon>
-        </button>
         <button mat-icon-button title="Edit" type="submit" (click)="openEditCategoryForm(category)">
           <mat-icon>edit</mat-icon>
         </button>
