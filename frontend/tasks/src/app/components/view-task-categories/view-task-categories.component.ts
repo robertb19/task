@@ -135,7 +135,6 @@ export class ViewTaskCategoriesComponent implements AfterViewInit, OnInit {
   }
 
   resetFilters() {
-    this.categoryName = ''
     window.location.reload();
   }
 }

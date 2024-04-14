@@ -182,10 +182,6 @@ export class ViewTasksComponent implements AfterViewInit, OnInit {
   }
 
   resetFilters() {
-    this.taskName = ''
-    this.categoryName = ''
-    this.deadline = new Date()
-    this.deadlineMode = 'AFTER'
     window.location.reload()
   }
 }
