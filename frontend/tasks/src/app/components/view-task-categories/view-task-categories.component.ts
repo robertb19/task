@@ -1,5 +1,4 @@
 import {
-  AfterContentChecked,
   AfterViewInit,
   ChangeDetectorRef,
   Component,
@@ -7,9 +6,9 @@ import {
   OnInit,
   ViewChild
 } from '@angular/core';
-import {CommonModule, NgFor} from "@angular/common";
+import {CommonModule} from "@angular/common";
 import {TaskCategoriesService} from "../../service/task-categories.service";
-import {MatPaginator, MatPaginatorModule, PageEvent} from "@angular/material/paginator";
+import {MatPaginator, MatPaginatorModule} from "@angular/material/paginator";
 import {TaskCategory} from "../../domain/task-category";
 import {MatSort, MatSortModule, Sort} from '@angular/material/sort';
 import {
@@ -22,11 +21,11 @@ import {HttpClientModule} from "@angular/common/http";
 import {MatInputModule} from "@angular/material/input";
 import {MatProgressSpinnerModule} from "@angular/material/progress-spinner";
 import {TaskCategoriesDataSource} from "./categories-data-source";
-import {catchError, debounceTime, distinctUntilChanged, finalize, fromEvent, map, merge, of, tap} from "rxjs";
-import {ActivatedRoute, RouterModule} from "@angular/router";
+import {catchError, map, merge, of, tap} from "rxjs";
+import {RouterModule} from "@angular/router";
 import {FormsModule} from "@angular/forms";
 import {MatButton, MatIconButton} from "@angular/material/button";
-import {MatDialog, MatDialogModule} from "@angular/material/dialog";
+import {MatDialog} from "@angular/material/dialog";
 import {AddTaskCategoryComponent} from "../add-task-category/add-task-category.component";
 import {MatIcon} from "@angular/material/icon";
 import {ToastrService} from "ngx-toastr";
@@ -122,10 +121,21 @@ export class ViewTaskCategoriesComponent implements AfterViewInit, OnInit {
   deleteTaskCategory(id : number) {
     this.taskCategoryService.delete(id).subscribe({
       next: () => {
-        alert("Task Category Deleted")
-        window.location.reload();
-        //todo change into toaster later
+        this.toastr.success("Successfully deleted task category",'',  {timeOut: 5000});
+        setTimeout(() => {
+          window.location.reload();
+        }, 1800);
+      },
+      error: (error) => {
+          setTimeout(() => {
+            this.toastr.error(error.message, '',  {timeOut: 3000})
+          }, 500);
       }
     })
+  }
+
+  resetFilters() {
+    this.categoryName = ''
+    window.location.reload();
   }
 }

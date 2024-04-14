@@ -7,6 +7,8 @@ import {MatButton} from "@angular/material/button";
 import {MAT_DIALOG_DATA, MatDialogActions, MatDialogClose} from "@angular/material/dialog";
 import {DialogRef} from "@angular/cdk/dialog";
 import {EditTaskCategoryForm, TaskCategory} from "../../domain/task-category";
+import {MatError, MatHint} from "@angular/material/form-field";
+import {NgIf} from "@angular/common";
 
 @Component({
   selector: 'app-edit-task-category',
@@ -15,7 +17,10 @@ import {EditTaskCategoryForm, TaskCategory} from "../../domain/task-category";
     FormsModule,
     MatButton,
     MatDialogActions,
-    MatDialogClose
+    MatDialogClose,
+    MatError,
+    MatHint,
+    NgIf
   ],
   templateUrl: './edit-task-category.component.html',
   styleUrl: './edit-task-category.component.css'
@@ -38,19 +43,18 @@ export class EditTaskCategoryComponent implements OnInit {
     this.isSubmitted = true;
     this.taskCategoryService.update(this.editTaskCategory, this.data.id).subscribe(async data => {
         if (data != null) {
-          this.toastr.success("Yay we succeeded");
+          this.toastr.success("Successfully edited task category",'',  {timeOut: 5000});
           this.dialog.close()
-          window.location.reload();
           setTimeout(() => {
-            this.router.navigate(['/categories']);
-          }, 500);
+            this.dialog.close()
+            window.location.reload();
+          }, 1800);
         }
       },
       async error => {
-        this.toastr.error(error.message);
-        window.location.reload();
         setTimeout(() => {
-          this.router.navigate(['/categories']);
+          this.toastr.error(error.message, '',  {timeOut: 3000})
+          this.dialog.close()
         }, 500);
       });
   }

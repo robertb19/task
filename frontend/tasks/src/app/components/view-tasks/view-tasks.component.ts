@@ -181,7 +181,11 @@ export class ViewTasksComponent implements AfterViewInit, OnInit {
     this.dialog.open(EditTaskComponent, {data: data})
   }
 
-/*  reset() {
-    thloadTasksPage()
-  }*/
+  resetFilters() {
+    this.taskName = ''
+    this.categoryName = ''
+    this.deadline = new Date()
+    this.deadlineMode = 'AFTER'
+    window.location.reload()
+  }
 }

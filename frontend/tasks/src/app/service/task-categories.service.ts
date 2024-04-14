@@ -32,7 +32,7 @@ export class TaskCategoriesService {
       .pipe(
         map((response: any) => response),
         catchError(error => {
-          console.log(error.status + " this is the error status")
+            console.log(error.status + " this is the error status")
             if (error.status == 409) {
               throw new Error(`Task category with this name already exists`)
             } else {
@@ -68,7 +68,13 @@ export class TaskCategoriesService {
     return this.httpClient.delete(paths.categoryWithIdUrl + id)
       .pipe(
         map((response: any) => response),
-        catchError(() => throwError(() => new Error(`Unable to delete task category`)))
+        catchError(error => {
+          if (error.error) {
+            throw new Error(error.error.message)
+          } else {
+            throw new Error(`Unable to delete task`)
+          }
+        })
       );
   }
 
@@ -85,13 +91,20 @@ export class TaskCategoriesService {
       httpOptions)
       .pipe(
         map((response: any) => response),
-        catchError(() => throwError(() => new Error(`Unable to edit task category`)))
-      );
+        catchError(error => {
+            console.log(error.status + " this is the error status")
+            if (error.status == 409) {
+              throw new Error(`Task category with this name already exists`)
+            } else {
+              throw new Error(`Unable to add task category`)
+            }
+          }
+        ));
   }
 
   private handleError<T>(operation = 'operation', result?: T) {
     return (error: any): Observable<T> => {
-      console.log(error +" heeeer eis the next error");
+      console.log(error + " heeeer eis the next error");
       return of(result as T);
     };
   }
