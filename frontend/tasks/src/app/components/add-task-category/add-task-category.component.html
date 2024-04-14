@@ -1,0 +1,31 @@
+<div class="container">
+  <div [hidden]="isSubmitted">
+    <form (ngSubmit)="onSubmit()" #taskCategoryForm="ngForm">
+      <div class="form-group">
+        <label for="name">Name</label>
+        <input type="text" class="form-control" id="name"
+               required
+               maxlength="100"
+               [(ngModel)]="addTaskCategory.name" name="name"
+               #nameWrapper="ngModel">
+        <mat-error style="font-size: 10px" *ngIf="nameWrapper.errors">Name is required</mat-error>
+        <mat-hint align="start" style="font-size: 10px">Not more then 100 characters long</mat-hint>
+      </div>
+
+
+
+      <div class="form-group">
+        <label for="name">Description</label>
+        <input type="text" class="form-control" id="description"
+               [(ngModel)]="addTaskCategory.description" name="description"
+               #description="ngModel"
+               maxlength="150">
+        <mat-hint align="start" style="font-size: 10px">Not more then 150 characters long</mat-hint>
+      </div>
+      <div mat-dialog-actions class="action">
+        <button mat-raised-button color="primary" type="button" class="btn btn-cancel" mat-dialog-close="false">Cancel</button>
+        <button mat-raised-button color="primary" type="submit" class="btn btn-success" (click)="AddTaskCategory()" [disabled]="!nameWrapper.valid">Submit</button>
+      </div>
+    </form>
+  </div>
+</div>

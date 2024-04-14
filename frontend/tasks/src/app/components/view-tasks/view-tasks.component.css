@@ -1,0 +1,66 @@
+.spinner-container {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  text-align: center;
+}
+
+.mat-row {
+  height: auto;
+}
+
+.mat-cell {
+  padding: 8px 8px 8px 0;
+}
+
+.tasks {
+  display: block;
+  width: auto;
+  height: auto;
+}
+
+.task-header {
+  font-size : 24px;
+}
+
+.task-header-container {
+  text-align: center
+}
+
+.button-holder {
+  overflow:hidden;
+  width:auto;
+  display:inline;
+}
+
+.submit-button {
+  float:left;
+  margin-left:10px;
+}
+
+.mat-form-field
+{
+  width: 300px;
+  padding-right: 5px;
+  margin-bottom: -1.25em;
+}
+
+.ngx-picker-custom {
+  direction: ltr;
+  .timepicker__header {
+    background-color: var(--color-cyan)!important;
+  }
+  .timepicker-button{
+    color: var(--color-cyan)!important;
+  }
+  .clock-face__clock-hand,
+  .clock-face__number > span.active,
+  .clock-face__clock-hand{
+    background-color: var(--color-cyan)!important;
+  }
+  .clock-face__clock-hand_minute:before {
+    border-color: var(--color-cyan)!important;
+  }
+}
