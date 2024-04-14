@@ -11,7 +11,7 @@ import {MatDatepicker, MatDatepickerInput, MatDatepickerToggle} from "@angular/m
 import {MatError, MatHint, MatLabel, MatSuffix} from "@angular/material/form-field";
 import {MatButton} from "@angular/material/button";
 import {MatInput} from "@angular/material/input";
-import {DatePipe, NgIf} from "@angular/common";
+import {NgIf} from "@angular/common";
 
 @Component({
   selector: 'app-edit-task',
@@ -35,9 +35,9 @@ import {DatePipe, NgIf} from "@angular/common";
   styleUrl: './edit-task.component.css'
 })
 export class EditTaskComponent implements OnInit {
-  dateFilter(date: Date | null): boolean  {
+  dateFilter(date: Date | null): boolean {
     const today = new Date()
-    if(date == null) return false
+    if (date == null) return false
     return date >= today
   }
 
@@ -45,7 +45,8 @@ export class EditTaskComponent implements OnInit {
 
   isSubmitted: boolean = false;
 
-  constructor(private router: Router, private taskService: TaskService, private taskCategoryService: TaskCategoriesService, private toastr: ToastrService, private dialog: DialogRef, @Inject(MAT_DIALOG_DATA) public data: Task) {}
+  constructor(private router: Router, private taskService: TaskService, private taskCategoryService: TaskCategoriesService, private toastr: ToastrService, private dialog: DialogRef, @Inject(MAT_DIALOG_DATA) public data: Task) {
+  }
 
   ngOnInit() {
     this.editTask.name = this.data.name;
@@ -56,35 +57,36 @@ export class EditTaskComponent implements OnInit {
 
   EditTask() {
     this.isSubmitted = true;
-    let categoryId : number = 0
+    let categoryId: number = 0
     this.taskCategoryService.get(1, 0, 'ASC', this.editTask.category_name).subscribe(
       value => {
-        if(value.elements != null && value.totalElements != 0) {
+        if (value.elements != null && value.totalElements != 0) {
           categoryId = value.elements[0].id
         }
 
         let editTaskForm = new EditTaskForm(undefined, undefined, undefined, undefined);
-        if(this.editTask.name != this.data.name) {
+        if (this.editTask.name != this.data.name) {
           editTaskForm.name = this.editTask.name
         }
 
-        if(this.editTask.description != this.data.description) {
+        if (this.editTask.description != this.data.description) {
           editTaskForm.description = this.editTask.description
         }
 
-        if(this.editTask.deadline != this.data.deadline) {
+        if (this.editTask.deadline != this.data.deadline) {
           editTaskForm.deadline = this.editTask.deadline.getTime() / 1000
         }
 
-        if(this.editTask.category_name != this.data.category.name) {
+        if (this.editTask.category_name != this.data.category.name) {
           editTaskForm.categoryId = categoryId
         }
 
-        this.taskService.update(editTaskForm, this.data.id).subscribe(async data => {
+        this.taskService.update(editTaskForm, this.data.id).subscribe({
+          next: (data) => {
             if (data != null) {
               var resultData = data;
               if (resultData != null) {
-                this.toastr.success("Successfully added task",'',  {timeOut: 5000});
+                this.toastr.success("Successfully added task", '', {timeOut: 5000});
                 this.dialog.close()
                 setTimeout(() => {
                   this.dialog.close()
@@ -93,12 +95,13 @@ export class EditTaskComponent implements OnInit {
               }
             }
           },
-          async error => {
+          error: (error) => {
             setTimeout(() => {
-              this.toastr.error(error.message, '',  {timeOut: 3000})
+              this.toastr.error(error.message, '', {timeOut: 3000})
               this.dialog.close()
             }, 500);
-          });
+          }
+        });
       },
     )
   }

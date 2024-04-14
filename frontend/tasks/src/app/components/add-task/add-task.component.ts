@@ -1,14 +1,12 @@
-import { Component } from '@angular/core';
-import {FormControl, FormsModule, Validators} from "@angular/forms";
+import {Component} from '@angular/core';
+import {FormsModule,} from "@angular/forms";
 import {MatButton} from "@angular/material/button";
 import {MatDialogActions, MatDialogClose} from "@angular/material/dialog";
 import {AddTaskForm, AddTaskViewForm} from "../../domain/task";
-import {Router} from "@angular/router";
 import {ToastrService} from "ngx-toastr";
 import {DialogRef} from "@angular/cdk/dialog";
 import {TaskService} from "../../service/task.service";
-import {AddTaskCategoryComponent} from "../add-task-category/add-task-category.component";
-import {DateFilterFn, MatDatepicker, MatDatepickerInput, MatDatepickerToggle} from "@angular/material/datepicker";
+import {MatDatepicker, MatDatepickerInput, MatDatepickerToggle} from "@angular/material/datepicker";
 import {MatError, MatHint, MatLabel} from "@angular/material/form-field";
 import {TaskCategoriesService} from "../../service/task-categories.service";
 import {MatNativeDateModule} from "@angular/material/core";
@@ -37,9 +35,9 @@ import {NgIf} from "@angular/common";
   styleUrl: './add-task.component.css'
 })
 export class AddTaskComponent {
-  dateFilter(date: Date | null): boolean  {
+  dateFilter(date: Date | null): boolean {
     const today = new Date()
-    if(date == null) return false
+    if (date == null) return false
     return date >= today
   }
 
@@ -47,24 +45,26 @@ export class AddTaskComponent {
 
   isSubmitted: boolean = false;
 
-  constructor(private router: Router, private taskService: TaskService, private taskCategoryService: TaskCategoriesService, private toastr: ToastrService, private dialog: DialogRef) {}
+  constructor(private taskService: TaskService, private taskCategoryService: TaskCategoriesService, private toastr: ToastrService, private dialog: DialogRef) {
+  }
 
   AddTask() {
     this.isSubmitted = true;
-    let categoryId : number = 0
+    let categoryId: number = 0
     this.taskCategoryService.get(1, 0, 'ASC', this.addTask.category_name).subscribe(
       value => {
-        if(value.elements != null && value.totalElements != 0) {
+        if (value.elements != null && value.totalElements != 0) {
           categoryId = value.elements[0].id
         }
 
         let deadlineAsEpochSecond = this.addTask.deadline.getTime() / 1000;
         let addTaskForm = new AddTaskForm(this.addTask.name, this.addTask.description, deadlineAsEpochSecond, categoryId);
-        this.taskService.addTask(addTaskForm).subscribe(async data => {
+        this.taskService.addTask(addTaskForm).subscribe({
+          next: (data) => {
             if (data != null) {
               var resultData = data;
               if (resultData != null) {
-                this.toastr.success("Successfully added task",'',  {timeOut: 5000});
+                this.toastr.success("Successfully added task", '', {timeOut: 5000});
                 this.dialog.close()
                 setTimeout(() => {
                   this.dialog.close()
@@ -73,12 +73,13 @@ export class AddTaskComponent {
               }
             }
           },
-          async error => {
+          error: (error) => {
             setTimeout(() => {
-              this.toastr.error(error.message, '',  {timeOut: 3000})
+              this.toastr.error(error.message, '', {timeOut: 3000})
               this.dialog.close()
             }, 500);
-          });
+          }
+        });
       },
     )
   }

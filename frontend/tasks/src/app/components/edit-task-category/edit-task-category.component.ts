@@ -49,7 +49,8 @@ export class EditTaskCategoryComponent implements OnInit {
       this.editTaskCategory.description = undefined
     }
 
-    this.taskCategoryService.update(this.editTaskCategory, this.data.id).subscribe(async data => {
+    this.taskCategoryService.update(this.editTaskCategory, this.data.id).subscribe({
+      next: (data) => {
         if (data != null) {
           this.toastr.success("Successfully edited task category",'',  {timeOut: 5000});
           this.dialog.close()
@@ -59,12 +60,12 @@ export class EditTaskCategoryComponent implements OnInit {
           }, 1800);
         }
       },
-      async error => {
+      error: (error) => {
         setTimeout(() => {
           this.toastr.error(error.message, '',  {timeOut: 3000})
           this.dialog.close()
         }, 500);
-      });
+      }});
   }
 
   onSubmit() {

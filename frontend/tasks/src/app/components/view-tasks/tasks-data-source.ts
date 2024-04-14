@@ -1,10 +1,8 @@
 import {CollectionViewer, DataSource} from "@angular/cdk/collections";
 import {BehaviorSubject, catchError, finalize, Observable, of} from "rxjs";
-import {TaskCategory} from "../../domain/task-category";
 import {Task} from "../../domain/task";
 import {TaskService} from "../../service/task.service";
 import {Page} from "../../domain/generic";
-import {Time} from "@angular/common";
 
 export class TasksDataSource implements DataSource<Task> {
   totalElements : number = 5

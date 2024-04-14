@@ -40,7 +40,8 @@ export class AddTaskCategoryComponent implements OnInit{
 
   AddTaskCategory() {
     this.isSubmitted = true;
-    this.taskCategoryService.addTaskCategory(this.addTaskCategory).subscribe(async data => {
+    this.taskCategoryService.addTaskCategory(this.addTaskCategory).subscribe({
+    next: (data) => {
         if (data != null) {
           var resultData = data;
           if (resultData != null) {
@@ -53,12 +54,12 @@ export class AddTaskCategoryComponent implements OnInit{
           }
         }
       },
-      async error => {
+      error: (error) => {
         setTimeout(() => {
           this.toastr.error(error.message, '',  {timeOut: 3000})
           this.dialog.close()
         }, 500);
-      });
+      }});
   }
 
   onSubmit() {

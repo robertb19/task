@@ -8,20 +8,16 @@ import {
   OnInit,
   ViewChild
 } from '@angular/core';
-import {AsyncPipe, CommonModule, formatDate, FormatWidth, getLocaleDateFormat, NgIf, Time} from "@angular/common";
+import {CommonModule} from "@angular/common";
 import {FormsModule} from "@angular/forms";
 import {MatButton, MatIconButton} from "@angular/material/button";
 import {
   MatCell,
-  MatCellDef,
   MatColumnDef,
   MatHeaderCell,
-  MatHeaderRow,
-  MatHeaderRowDef,
-  MatRow, MatRowDef, MatTable, MatTableModule
+  MatTableModule
 } from "@angular/material/table";
 import {MatIcon} from "@angular/material/icon";
-import {MatLabel} from "@angular/material/form-field";
 import {MatPaginator, MatPaginatorModule} from "@angular/material/paginator";
 import {MatProgressSpinnerModule} from "@angular/material/progress-spinner";
 import {MatSort, MatSortModule} from "@angular/material/sort";
@@ -35,13 +31,11 @@ import {catchError, map, merge, of, tap} from "rxjs";
 import {Page} from "../../domain/generic";
 import {TasksDataSource} from "./tasks-data-source";
 import {TaskCategoriesService} from "../../service/task-categories.service";
-import {TaskCategory} from "../../domain/task-category";
 import {MatDatepicker, MatDatepickerInput, MatDatepickerToggle} from "@angular/material/datepicker";
 import {MatOption} from "@angular/material/autocomplete";
 import {MatSelect} from "@angular/material/select";
-import {EditTaskCategoryComponent} from "../edit-task-category/edit-task-category.component";
 import {AddTaskComponent} from "../add-task/add-task.component";
-import {EditTaskForm, Task} from "../../domain/task";
+import {Task} from "../../domain/task";
 import {EditTaskComponent} from "../edit-task/edit-task.component";
 import {CalendarModule} from "primeng/calendar";
 import {NgxMaterialTimepickerComponent, NgxMaterialTimepickerModule} from "ngx-material-timepicker";
@@ -78,13 +72,13 @@ import {NgxMaterialTimepickerComponent, NgxMaterialTimepickerModule} from "ngx-m
   styleUrl: './view-tasks.component.css'
 })
 export class ViewTasksComponent implements AfterViewInit, OnInit {
-  displayedColumns = ["id", "name", "description",  "deadline", "category", "action"];
-  dataSource : TasksDataSource
-  totalElements : number = 0
-  defaultPage : number = 0
-  defaultSize : number = 5
-  defaultSort : string = "DESC"
-  taskName : string
+  displayedColumns = ["id", "name", "description", "deadline", "category", "action"];
+  dataSource: TasksDataSource
+  totalElements: number = 0
+  defaultPage: number = 0
+  defaultSize: number = 5
+  defaultSort: string = "DESC"
+  taskName: string
   categoryName: string
   deadline: Date
   time: string
@@ -95,9 +89,10 @@ export class ViewTasksComponent implements AfterViewInit, OnInit {
   @ViewChild(MatPaginator) paginator: MatPaginator;
   @ViewChild(MatSort) sort: MatSort;
   @ViewChild('nameInput') input: ElementRef;
-  @ViewChild(NgxMaterialTimepickerComponent, { static: true })  public picker?: MatDatepicker<Date>;
+  @ViewChild(NgxMaterialTimepickerComponent, {static: true}) public picker?: MatDatepicker<Date>;
 
-  constructor(private taskService : TaskService, private taskCategoryService : TaskCategoriesService, private changeDetector: ChangeDetectorRef, private dialog : MatDialog, private toastr: ToastrService, @Inject( LOCALE_ID ) private locale: string) {}
+  constructor(private taskService: TaskService, private taskCategoryService: TaskCategoriesService, private changeDetector: ChangeDetectorRef, private dialog: MatDialog, private toastr: ToastrService, @Inject(LOCALE_ID) private locale: string) {
+  }
 
   ngOnInit(): void {
     this.dataSource = new TasksDataSource(this.taskService);
@@ -124,14 +119,16 @@ export class ViewTasksComponent implements AfterViewInit, OnInit {
     this.changeDetector.detectChanges();
   }
 
-  onSubmit() { this.isSubmitted = true; }
+  onSubmit() {
+    this.isSubmitted = true;
+  }
 
   loadTasksPage() {
-    let categoryId : number = 0
-    if(this.categoryName != null && this.categoryName != '') {
+    let categoryId: number = 0
+    if (this.categoryName != null && this.categoryName != '') {
       this.taskCategoryService.get(1, 0, 'ASC', this.categoryName).subscribe(
         value => {
-          if(value.elements != null && value.totalElements != 0) {
+          if (value.elements != null && value.totalElements != 0) {
             categoryId = value.elements[0].id
           }
 
@@ -170,12 +167,18 @@ export class ViewTasksComponent implements AfterViewInit, OnInit {
     );
   }
 
-  deleteTask(id : number) {
+  deleteTask(id: number) {
     this.taskService.delete(id).subscribe({
       next: () => {
-        alert("Task Deleted")
-        window.location.reload();
-        //todo change into toaster later
+        this.toastr.success("Successfully deleted task", '', {timeOut: 5000});
+        setTimeout(() => {
+          window.location.reload();
+        }, 1800);
+      },
+      error: (error) => {
+        setTimeout(() => {
+          this.toastr.error(error.message, '', {timeOut: 3000})
+        }, 500);
       }
     })
   }
@@ -184,7 +187,7 @@ export class ViewTasksComponent implements AfterViewInit, OnInit {
     this.dialog.open(AddTaskComponent)
   }
 
-  openEditTaskForm(data : Task) {
+  openEditTaskForm(data: Task) {
     this.dialog.open(EditTaskComponent, {data: data})
   }
 

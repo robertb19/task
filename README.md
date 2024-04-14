@@ -12,6 +12,7 @@ Frontend Notes (missing front-end items, had to skip due to time constraints):
 - Update population of the deadline field
 - Screens for a single Task Category / Task (although that would be semi useful at the moment as we can already see all the information displayed)
 - Responsiveness as the site is not really responsive at the current state
+- Tests on the UI elements
 
 Items to improve on the front-end
 - Much better component reusability

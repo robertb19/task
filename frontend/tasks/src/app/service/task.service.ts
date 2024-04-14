@@ -5,7 +5,6 @@ import {globalProperties} from "../../properties";
 import {AddTaskForm} from "../domain/task";
 import {Page} from "../domain/generic";
 import {EditTaskCategoryForm} from "../domain/task-category";
-import {Time} from "@angular/common";
 
 var paths = {
   baseTaskUrl: globalProperties.baseUrl + "/v1.0/tasks",
