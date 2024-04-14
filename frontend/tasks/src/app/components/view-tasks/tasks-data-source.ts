@@ -4,6 +4,7 @@ import {TaskCategory} from "../../domain/task-category";
 import {Task} from "../../domain/task";
 import {TaskService} from "../../service/task.service";
 import {Page} from "../../domain/generic";
+import {Time} from "@angular/common";
 
 export class TasksDataSource implements DataSource<Task> {
   totalElements : number = 5
@@ -25,10 +26,9 @@ export class TasksDataSource implements DataSource<Task> {
     this.loadingSubject.complete();
   }
 
-  loadTasks(pageSize: number, pageNumber: number, sortDirection: string, deadlineMode: string, name?: string, taskCategoryId?: number, deadline?: Date) {
+  loadTasks(pageSize: number, pageNumber: number, sortDirection: string, deadlineMode: string, time: string, name?: string, taskCategoryId?: number, deadline?: Date) {
     this.loadingSubject.next(true);
-    console.log('logging name here' + name)
-    this.taskService.get(pageSize, pageNumber, sortDirection.toUpperCase(), deadlineMode, name, taskCategoryId, deadline).pipe(
+    this.taskService.get(pageSize, pageNumber, sortDirection.toUpperCase(), deadlineMode, time, name, taskCategoryId, deadline).pipe(
       catchError(() => of([])),
       finalize(() => this.loadingSubject.next(false))
     )

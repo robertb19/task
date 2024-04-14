@@ -25,12 +25,11 @@
       </div>
       <div class="form-group">
         <div class="d-inline-flex" style="align-items: center">
-          <input class="align-bottom" matInput [matDatepicker]="picker" [(ngModel)]="editTask.deadline" name="deadline"
-                 value="{{data.deadline}}}" required #deadline="ngModel">
+          <input class="align-bottom" matInput [matDatepicker]="picker" [matDatepickerFilter]="dateFilter"[(ngModel)]="editTask.deadline" name="deadline"
+                 value="{{data.deadline}}}" #deadline="ngModel">
           <mat-datepicker-toggle matIconSuffix [for]="picker"></mat-datepicker-toggle>
           <mat-datepicker #picker></mat-datepicker>
         </div>
-        <mat-error style="font-size: 10px" *ngIf="deadline.errors">Deadline is required and must be after today</mat-error>
       </div>
 
       <div class="form-group">
@@ -46,7 +45,7 @@
         <button mat-raised-button color="primary" type="button" class="btn btn-cancel" mat-dialog-close="false">Cancel
         </button>
         <button mat-raised-button color="primary" type="submit" class="btn btn-success" (click)="EditTask()"
-                [disabled]="!nameWrapper.valid || !deadline.valid || !category.valid">Submit
+                [disabled]="!nameWrapper.valid || !category.valid">Submit
         </button>
       </div>
     </form>

@@ -100,7 +100,6 @@ export class ViewTaskCategoriesComponent implements AfterViewInit, OnInit {
   onSubmit() { this.isSubmitted = true; }
 
   loadTaskCategoriesPage() {
-    console.log(this.categoryName)
     this.dataSource.loadTaskCategories(
       this.paginator.pageSize,
       this.paginator.pageIndex,
@@ -110,7 +109,6 @@ export class ViewTaskCategoriesComponent implements AfterViewInit, OnInit {
   }
 
   openAddCategoryForm() {
-    console.log("I work")
     this.dialog.open(AddTaskCategoryComponent)
   }
 

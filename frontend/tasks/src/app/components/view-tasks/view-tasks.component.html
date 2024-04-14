@@ -21,14 +21,25 @@
                #name="ngModel">
       </mat-form-field>
 
-
       <mat-form-field class="mat-form-field" style="width: 200px">
-        <mat-label>Deadline</mat-label>
+        <mat-label>Deadline Date</mat-label>
         <input matInput [matDatepicker]="picker" [(ngModel)]="deadline" name="deadline">
         <mat-datepicker-toggle matIconSuffix [for]="picker"></mat-datepicker-toggle>
         <mat-datepicker #picker></mat-datepicker>
       </mat-form-field>
 
+      <mat-form-field class="mat-form-field" style="width: 150px">
+        <mat-label>Deadline Time</mat-label>
+        <input
+          matInput
+          [ngxTimepicker]="defaultValue"Z
+          [(ngModel)]="time"
+          value="00:00 AM"
+          name="deadlineTime"
+        />
+        <ngx-material-timepicker #defaultValue>
+        </ngx-material-timepicker>
+      </mat-form-field>
 
       <mat-form-field class="mat-form-field" style="width: 200px">
         <mat-label>Deadline Mode</mat-label>
@@ -39,7 +50,7 @@
         </mat-select>
       </mat-form-field>
 
-      <div class="mat-form-field" style="width: 10%">
+      <div class="mat-form-field" style="width: 0%">
       </div>
 
       <div style="display: flex; flex-direction: row">
@@ -92,7 +103,7 @@
         <mat-header-cell *matHeaderCellDef>Deadline</mat-header-cell>
         <mat-cell class="description-cell"
                   *matCellDef="let task">
-          {{ task.deadline | date:'yyyy-MM-dd hh:mm zz' }}
+          {{ task.deadline | date:'yyyy-MM-dd HH:mm zz' }}
         </mat-cell>
       </ng-container>
 

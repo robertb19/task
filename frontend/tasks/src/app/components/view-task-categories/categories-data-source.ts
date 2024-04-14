@@ -26,7 +26,6 @@ export class TaskCategoriesDataSource implements DataSource<TaskCategory> {
 
   loadTaskCategories(pageSize: number, pageNumber: number, sortDirection: string, name?: string) {
     this.loadingSubject.next(true);
-    console.log('logging name here' + name)
     this.taskCategoriesService.get(pageSize, pageNumber, sortDirection.toUpperCase(), name).pipe(
       catchError(() => of([])),
       finalize(() => this.loadingSubject.next(false))

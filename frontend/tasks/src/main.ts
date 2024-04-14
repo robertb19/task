@@ -8,11 +8,11 @@ import {importProvidersFrom} from "@angular/core";
 import {MatToolbarModule} from "@angular/material/toolbar";
 import {provideRouter, Routes} from "@angular/router";
 import {ViewTaskCategoriesComponent} from "./app/components/view-task-categories/view-task-categories.component";
-import {AddTaskCategoryComponent} from "./app/components/add-task-category/add-task-category.component";
 import {ViewTasksComponent} from "./app/components/view-tasks/view-tasks.component";
 import {registerLocaleData} from "@angular/common";
 import {enGbLocale} from "ngx-bootstrap/chronos";
 import {provideNativeDateAdapter} from "@angular/material/core";
+import {NgxMaterialTimepickerComponent, NgxMaterialTimepickerModule} from "ngx-material-timepicker";
 
 const routes: Routes = [
   { path: '', component: ViewTaskCategoriesComponent },
@@ -24,5 +24,5 @@ registerLocaleData(enGbLocale, 'en-GB')
 
 bootstrapApplication(AppComponent, {
   providers: [provideHttpClient(), provideToastr(), provideAnimationsAsync(), provideRouter(routes), provideNativeDateAdapter(),
-    importProvidersFrom([BrowserAnimationsModule, MatToolbarModule])]
+    importProvidersFrom([BrowserAnimationsModule, MatToolbarModule, NgxMaterialTimepickerModule, NgxMaterialTimepickerComponent])]
 }).catch((err) => console.error(err));

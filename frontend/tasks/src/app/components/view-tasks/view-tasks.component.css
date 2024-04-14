@@ -46,3 +46,21 @@
   padding-right: 5px;
   margin-bottom: -1.25em;
 }
+
+.ngx-picker-custom {
+  direction: ltr;
+  .timepicker__header {
+    background-color: var(--color-cyan)!important;
+  }
+  .timepicker-button{
+    color: var(--color-cyan)!important;
+  }
+  .clock-face__clock-hand,
+  .clock-face__number > span.active,
+  .clock-face__clock-hand{
+    background-color: var(--color-cyan)!important;
+  }
+  .clock-face__clock-hand_minute:before {
+    border-color: var(--color-cyan)!important;
+  }
+}

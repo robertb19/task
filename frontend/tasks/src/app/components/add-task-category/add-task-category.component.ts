@@ -55,7 +55,6 @@ export class AddTaskCategoryComponent implements OnInit{
       },
       async error => {
         setTimeout(() => {
-          console.log("and here is our error " + error)
           this.toastr.error(error.message, '',  {timeOut: 3000})
           this.dialog.close()
         }, 500);
@@ -63,7 +62,6 @@ export class AddTaskCategoryComponent implements OnInit{
   }
 
   onSubmit() {
-    console.log("I submitted")
     this.isSubmitted = true;
   }
 }

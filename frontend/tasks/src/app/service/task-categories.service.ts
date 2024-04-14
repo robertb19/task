@@ -32,7 +32,6 @@ export class TaskCategoriesService {
       .pipe(
         map((response: any) => response),
         catchError(error => {
-            console.log(error.status + " this is the error status")
             if (error.status == 409) {
               throw new Error(`Task category with this name already exists`)
             } else {
@@ -48,12 +47,10 @@ export class TaskCategoriesService {
     params = params.set('page', pageNumber.toString())
     params = params.set('sort', sortDirection)
 
-    console.log(name + "and here ")
     if (name != null && name != '') {
       params = params.set('name', name as string)
     }
 
-    console.log("therse are the params " + params)
     return this.httpClient.get<Page>(
       paths.baseCategoryUrl, {
         params: params
@@ -92,7 +89,6 @@ export class TaskCategoriesService {
       .pipe(
         map((response: any) => response),
         catchError(error => {
-            console.log(error.status + " this is the error status")
             if (error.status == 409) {
               throw new Error(`Task category with this name already exists`)
             } else {
@@ -104,7 +100,6 @@ export class TaskCategoriesService {
 
   private handleError<T>(operation = 'operation', result?: T) {
     return (error: any): Observable<T> => {
-      console.log(error + " heeeer eis the next error");
       return of(result as T);
     };
   }

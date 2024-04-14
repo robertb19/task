@@ -6,7 +6,18 @@ How to run the application:
 - docker build -t robb/todos:latest -t robb/todos:0.0.1 .
 - docker run -p 8080:8080 robb/todos:0.0.1
 
-Notes:
+Frontend Notes (missing front-end items, had to skip due to time constraints):
+- Customization of the color of the time picker
+- Adding the option to add the deadline at a specfiic time using the time picker
+- Update population of the deadline field
+- Screens for a single Task Category / Task (although that would be semi useful at the moment as we can already see all the information displayed)
+- Responsiveness as the site is not really responsive at the current state
+
+Items to improve on the front-end
+- Much better component reusability
+- The whole look of the site
+
+Backend Notes:
 - The specific architectural approach, CQRS together with semi-Hexagonal architecture was chosen in order to be more flexible with future
 additions of new serialization methods (as we have REST only now) or switch outs/separation to other database - eg. if we wanted to have a different 
 DB for reads and writes. The separate model for writes and reads provides us with that flexibility for the future, even though we use one H2 DB now

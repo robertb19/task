@@ -84,7 +84,6 @@ export class AddTaskComponent {
   }
 
   onSubmit() {
-    console.log("I submitted")
     this.isSubmitted = true;
   }
 }

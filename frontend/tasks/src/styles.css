@@ -1,6 +1,7 @@
 /* Application-wide Styles */
 @import '@angular/material/prebuilt-themes/deeppurple-amber.css';
 @import 'ngx-toastr/toastr';
+
 /*
 h1 {
   color: #369;

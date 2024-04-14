@@ -5,6 +5,7 @@ import {globalProperties} from "../../properties";
 import {AddTaskForm} from "../domain/task";
 import {Page} from "../domain/generic";
 import {EditTaskCategoryForm} from "../domain/task-category";
+import {Time} from "@angular/common";
 
 var paths = {
   baseTaskUrl: globalProperties.baseUrl + "/v1.0/tasks",
@@ -44,6 +45,7 @@ export class TaskService {
       pageNumber: number,
       sortDirection: string,
       deadlineMode : string,
+      time : string,
       name?: string,
       categoryId? : number,
       deadline? : Date): Observable<Page> {
@@ -67,10 +69,11 @@ export class TaskService {
     }
 
     if(deadline != null) {
+      if(time != undefined && time != '') {
+        deadline = this.getNewDeadline(deadline, time)
+      }
       params = params.set('deadlineDate', deadline.getTime() / 1000) //as Epoch Seconds
     }
-
-    console.log(params + " these are my params")
 
     return this.httpClient.get<Page>(
       paths.baseTaskUrl, {
@@ -103,7 +106,13 @@ export class TaskService {
       httpOptions)
       .pipe(
         map((response: any) => response),
-        catchError(() => throwError(() => new Error(`Unable to edit task`)))
+        catchError(error => {
+          if(error.error) {
+            throw new Error(error.error.message)
+          } else {
+            throw new Error(`Unable to edit task`)
+          }
+        })
       );
   }
 
@@ -112,5 +121,27 @@ export class TaskService {
       console.error(error);
       return of(result as T);
     };
+  }
+
+  private getNewDeadline(date : Date, time: string) : Date {
+    let deadlineCopy = new Date(date)
+    let hoursMinutesAndTimeZone = time.toString().split(":")
+    let minutesAndTimeOfDay = hoursMinutesAndTimeZone[1].split(" ")
+    let hourAsNumber: number = +hoursMinutesAndTimeZone[0];
+    let minuteAsNumber: number = +minutesAndTimeOfDay[0];
+    if(minutesAndTimeOfDay[1] == 'PM') {
+      if(hourAsNumber == 12) {
+        deadlineCopy.setHours(12, minuteAsNumber)
+      } else {
+        deadlineCopy.setHours(hourAsNumber + 12, minuteAsNumber)
+      }
+    } else {
+      if(hourAsNumber == 12) {
+        deadlineCopy.setHours(0, minuteAsNumber)
+      } else {
+        deadlineCopy.setHours(hourAsNumber, minuteAsNumber)
+      }
+    }
+    return deadlineCopy
   }
 }

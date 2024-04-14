@@ -8,7 +8,7 @@ import {
   OnInit,
   ViewChild
 } from '@angular/core';
-import {AsyncPipe, CommonModule, formatDate, FormatWidth, getLocaleDateFormat, NgIf} from "@angular/common";
+import {AsyncPipe, CommonModule, formatDate, FormatWidth, getLocaleDateFormat, NgIf, Time} from "@angular/common";
 import {FormsModule} from "@angular/forms";
 import {MatButton, MatIconButton} from "@angular/material/button";
 import {
@@ -43,6 +43,8 @@ import {EditTaskCategoryComponent} from "../edit-task-category/edit-task-categor
 import {AddTaskComponent} from "../add-task/add-task.component";
 import {EditTaskForm, Task} from "../../domain/task";
 import {EditTaskComponent} from "../edit-task/edit-task.component";
+import {CalendarModule} from "primeng/calendar";
+import {NgxMaterialTimepickerComponent, NgxMaterialTimepickerModule} from "ngx-material-timepicker";
 
 @Component({
   selector: 'app-view-tasks',
@@ -68,7 +70,9 @@ import {EditTaskComponent} from "../edit-task/edit-task.component";
     MatDatepickerToggle,
     MatDatepickerInput,
     MatOption,
-    MatSelect
+    MatSelect,
+    CalendarModule,
+    NgxMaterialTimepickerModule
   ],
   templateUrl: './view-tasks.component.html',
   styleUrl: './view-tasks.component.css'
@@ -82,7 +86,8 @@ export class ViewTasksComponent implements AfterViewInit, OnInit {
   defaultSort : string = "DESC"
   taskName : string
   categoryName: string
-  deadline: Date;
+  deadline: Date
+  time: string
   deadlineMode: string = 'AFTER';
   isSubmitted: boolean = false;
   deadlineModes = ['AFTER', 'BEFORE'];
@@ -90,12 +95,13 @@ export class ViewTasksComponent implements AfterViewInit, OnInit {
   @ViewChild(MatPaginator) paginator: MatPaginator;
   @ViewChild(MatSort) sort: MatSort;
   @ViewChild('nameInput') input: ElementRef;
+  @ViewChild(NgxMaterialTimepickerComponent, { static: true })  public picker?: MatDatepicker<Date>;
 
   constructor(private taskService : TaskService, private taskCategoryService : TaskCategoriesService, private changeDetector: ChangeDetectorRef, private dialog : MatDialog, private toastr: ToastrService, @Inject( LOCALE_ID ) private locale: string) {}
 
   ngOnInit(): void {
     this.dataSource = new TasksDataSource(this.taskService);
-    this.taskService.get(this.defaultSize, this.defaultPage, this.defaultSort, this.deadlineMode).pipe(
+    this.taskService.get(this.defaultSize, this.defaultPage, this.defaultSort, this.deadlineMode, this.time).pipe(
       map((response) => response),
       catchError(() => of([])),
     )
@@ -133,30 +139,31 @@ export class ViewTasksComponent implements AfterViewInit, OnInit {
             this.paginator.pageIndex,
             this.sort.direction,
             this.deadlineMode,
+            this.time,
             this.taskName,
             categoryId,
             this.deadline)
         },
       )
     } else {
-      console.log("but i am here")
       this.load(this.paginator.pageSize,
         this.paginator.pageIndex,
         this.sort.direction,
         this.deadlineMode,
+        this.time,
         this.taskName,
         undefined,
         this.deadline)
     }
   }
 
-  load(pageSize: number, pageNumber: number, sortDirection: string, deadlineMode: string, name?: string, categoryId?: number, deadline?: Date) {
-    console.log("Here i have some taskCategory id " + categoryId)
+  load(pageSize: number, pageNumber: number, sortDirection: string, deadlineMode: string, time: string, name?: string, categoryId?: number, deadline?: Date) {
     this.dataSource.loadTasks(
       pageSize,
       pageNumber,
       sortDirection,
       deadlineMode,
+      time,
       name,
       categoryId,
       deadline

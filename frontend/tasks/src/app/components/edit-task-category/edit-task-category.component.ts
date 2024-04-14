@@ -34,13 +34,21 @@ export class EditTaskCategoryComponent implements OnInit {
   }
 
   ngOnInit() {
-    console.log(this.data);
     this.editTaskCategory.name = this.data.name;
     this.editTaskCategory.description = this.data.description;
   }
 
   EditTaskCategory() {
     this.isSubmitted = true;
+
+    if(this.editTaskCategory.name == this.data.name) {
+      this.editTaskCategory.name = undefined
+    }
+
+    if(this.editTaskCategory.description == this.data.description) {
+      this.editTaskCategory.description = undefined
+    }
+
     this.taskCategoryService.update(this.editTaskCategory, this.data.id).subscribe(async data => {
         if (data != null) {
           this.toastr.success("Successfully edited task category",'',  {timeOut: 5000});
@@ -60,7 +68,6 @@ export class EditTaskCategoryComponent implements OnInit {
   }
 
   onSubmit() {
-    console.log("I submitted")
     this.isSubmitted = true;
   }
 }

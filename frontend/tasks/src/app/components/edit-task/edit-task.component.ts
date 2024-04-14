@@ -48,7 +48,6 @@ export class EditTaskComponent implements OnInit {
   constructor(private router: Router, private taskService: TaskService, private taskCategoryService: TaskCategoriesService, private toastr: ToastrService, private dialog: DialogRef, @Inject(MAT_DIALOG_DATA) public data: Task) {}
 
   ngOnInit() {
-    console.log(this.data);
     this.editTask.name = this.data.name;
     this.editTask.description = this.data.description;
     this.editTask.deadline = this.data.deadline;
@@ -64,8 +63,23 @@ export class EditTaskComponent implements OnInit {
           categoryId = value.elements[0].id
         }
 
-        let deadlineAsEpochSecond = this.editTask.deadline.getTime() / 1000;
-        let editTaskForm = new EditTaskForm(this.editTask.name, this.editTask.description, deadlineAsEpochSecond, categoryId);
+        let editTaskForm = new EditTaskForm(undefined, undefined, undefined, undefined);
+        if(this.editTask.name != this.data.name) {
+          editTaskForm.name = this.editTask.name
+        }
+
+        if(this.editTask.description != this.data.description) {
+          editTaskForm.description = this.editTask.description
+        }
+
+        if(this.editTask.deadline != this.data.deadline) {
+          editTaskForm.deadline = this.editTask.deadline.getTime() / 1000
+        }
+
+        if(this.editTask.category_name != this.data.category.name) {
+          editTaskForm.categoryId = categoryId
+        }
+
         this.taskService.update(editTaskForm, this.data.id).subscribe(async data => {
             if (data != null) {
               var resultData = data;
@@ -90,7 +104,6 @@ export class EditTaskComponent implements OnInit {
   }
 
   onSubmit() {
-    console.log("I submitted")
     this.isSubmitted = true;
   }
 }
