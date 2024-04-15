@@ -2,9 +2,10 @@ DB model:
 
 ![DB model](DBModel.png)
 
-How to run the application:
+How to run the dockerized application:
 - docker build -t robb/todos:latest -t robb/todos:0.0.1 .
 - docker run -p 8080:8080 robb/todos:0.0.1
+- ng serve in the ./frontend/tasks directory
 
 Frontend Notes (missing front-end items, had to skip due to time constraints):
 - Customization of the color of the time picker
