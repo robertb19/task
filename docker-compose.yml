@@ -1,8 +1,5 @@
 version: "3"
 
-volumes:
-  dbdata:
-
 services:
   backend:
     image: robb/todos:0.0.1
