@@ -1,0 +1,16 @@
+version: "3"
+
+volumes:
+  dbdata:
+
+services:
+  backend:
+    image: robb/todos:0.0.1
+    ports:
+      - "8080:8080"
+  frontend:
+    image: robb/todos-fe:0.0.1
+    ports:
+      - "4200:4200"
+    depends_on:
+      - backend
